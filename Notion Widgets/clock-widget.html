@@ -7,7 +7,7 @@
 <style>
   html, body {
     margin: 0; padding: 0;
-    background: transparent;
+    background: #D87E50;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Arial, sans-serif;
   }
   body {
@@ -22,9 +22,7 @@
     width: 100%;
     max-width: 340px;
     padding: 28px 24px 24px;
-    border-radius: 28px;
     background: #D87E50;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
     color: white;
     box-sizing: border-box;
     position: relative;
@@ -135,12 +133,12 @@
   // ===== Customize your name here =====
   const USER_NAME = 'Hello 👋';
   // ====================================
-
+  
   const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-
+  
   document.getElementById('name').textContent = USER_NAME;
-
+  
   function update() {
     const now = new Date();
     let h = now.getHours();
@@ -149,7 +147,7 @@
     h = h % 12; if (h === 0) h = 12;
     document.getElementById('time').textContent = h + ':' + m;
     document.getElementById('ampm').textContent = ampm;
-
+    
     const hour = now.getHours();
     let greet;
     if (hour < 5) greet = 'Late night,';
@@ -158,7 +156,7 @@
     else if (hour < 21) greet = 'Good evening,';
     else greet = 'Good night,';
     document.getElementById('greeting').textContent = greet;
-
+    
     document.getElementById('dayName').textContent = DAYS[now.getDay()];
     document.getElementById('monthName').textContent = MONTHS[now.getMonth()];
     document.getElementById('dayNum').textContent = now.getDate();
