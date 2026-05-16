@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coffee Mugs</title>
+<style>
+  html, body {
+    margin: 0; padding: 0;
+    background: transparent;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  }
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 20px 16px;
+    box-sizing: border-box;
+    min-height: 100vh;
+  }
+  .column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    max-width: 200px;
+  }
+  .mug {
+    width: 100%;
+    animation: bob 5s ease-in-out infinite;
+  }
+  .mug:nth-child(1) { animation-delay: 0s; }
+  .mug:nth-child(2) { animation-delay: -1.25s; }
+  .mug:nth-child(3) { animation-delay: -2.5s; }
+  .mug:nth-child(4) { animation-delay: -3.75s; }
+
+  @keyframes bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+  }
+
+  .mug svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    filter: drop-shadow(0 6px 10px rgba(216, 126, 80, 0.22));
+  }
+
+  .wisp {
+    fill: none;
+    stroke: #D87E50;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    opacity: 0;
+    animation: rise 3.5s ease-out infinite;
+  }
+  .w1 { animation-delay: 0s; }
+  .w2 { animation-delay: 1.2s; }
+  .w3 { animation-delay: 2.4s; }
+
+  @keyframes rise {
+    0%   { transform: translateY(18px); opacity: 0; }
+    15%  { opacity: 0.55; }
+    55%  { opacity: 0.4; }
+    100% { transform: translateY(-30px); opacity: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="column">
+
+  <!-- 1. Classic diner mug -->
+  <div class="mug">
+    <svg viewBox="0 0 140 200" xmlns="http://www.w3.org/2000/svg">
+      <g>
+        <path class="wisp w1" d="M 55 92 Q 50 78 55 64 Q 60 50 55 36"/>
+        <path class="wisp w2" d="M 70 92 Q 75 78 70 64 Q 65 50 70 36"/>
+        <path class="wisp w3" d="M 85 92 Q 80 78 85 64 Q 90 50 85 36"/>
+      </g>
+      <g>
+        <!-- handle -->
+        <path d="M 110 120 Q 132 125 132 145 Q 132 165 110 170"
+              fill="none" stroke="#D87E50" stroke-width="7" stroke-linecap="round"/>
+        <!-- body -->
+        <rect x="22" y="100" width="92" height="80" rx="7"
+              fill="white" stroke="#D87E50" stroke-width="4"/>
+        <!-- coffee surface -->
+        <ellipse cx="68" cy="104" rx="44" ry="6" fill="#D87E50"/>
+      </g>
+    </svg>
+  </div>
+
+  <!-- 2. Espresso cup with saucer -->
+  <div class="mug">
+    <svg viewBox="0 0 140 200" xmlns="http://www.w3.org/2000/svg">
+      <g>
+        <path class="wisp w1" d="M 60 112 Q 65 98 60 84 Q 55 70 60 56"/>
+        <path class="wisp w2" d="M 75 112 Q 70 98 75 84 Q 80 70 75 56"/>
+      </g>
+      <g>
+        <!-- cup (truncated cone) -->
+        <path d="M 50 118 L 55 172 Q 55 177 60 177 L 90 177 Q 95 177 95 172 L 100 118 Z"
+              fill="#D87E50"/>
+        <!-- handle -->
+        <path d="M 96 132 Q 116 137 116 152 Q 116 167 96 169"
+              fill="none" stroke="#D87E50" stroke-width="5" stroke-linecap="round"/>
+        <!-- foam/coffee surface -->
+        <ellipse cx="75" cy="119" rx="25" ry="5" fill="white"/>
+        <!-- saucer -->
+        <ellipse cx="75" cy="185" rx="55" ry="7" fill="#D87E50"/>
+      </g>
+    </svg>
+  </div>
+
+  <!-- 3. Tall latte glass -->
+  <div class="mug">
+    <svg viewBox="0 0 140 200" xmlns="http://www.w3.org/2000/svg">
+      <g>
+        <path class="wisp w1" d="M 60 62 Q 55 48 60 34 Q 65 20 60 6"/>
+        <path class="wisp w2" d="M 75 62 Q 80 48 75 34 Q 70 20 75 6"/>
+        <path class="wisp w3" d="M 90 62 Q 85 48 90 34 Q 95 20 90 6"/>
+      </g>
+      <g>
+        <!-- glass outline -->
+        <path d="M 48 72 L 53 180 Q 53 186 59 186 L 91 186 Q 97 186 97 180 L 102 72 Z"
+              fill="white" stroke="#D87E50" stroke-width="4"/>
+        <!-- coffee fill -->
+        <path d="M 52 104 L 56 183 Q 56 184 59 184 L 91 184 Q 94 184 94 183 L 98 104 Z"
+              fill="#D87E50"/>
+        <!-- foam layer -->
+        <ellipse cx="75" cy="104" rx="23" ry="5" fill="white"/>
+      </g>
+    </svg>
+  </div>
+
+  <!-- 4. To-go coffee cup -->
+  <div class="mug">
+    <svg viewBox="0 0 140 200" xmlns="http://www.w3.org/2000/svg">
+      <g>
+        <path class="wisp w1" d="M 62 56 Q 57 42 62 28 Q 67 14 62 0"/>
+        <path class="wisp w2" d="M 78 56 Q 83 42 78 28 Q 73 14 78 0"/>
+      </g>
+      <g>
+        <!-- domed lid top -->
+        <path d="M 38 76 Q 38 60 70 60 Q 102 60 102 76 Z"
+              fill="white" stroke="#D87E50" stroke-width="3.5"/>
+        <!-- sip hole -->
+        <ellipse cx="58" cy="68" rx="5" ry="3" fill="#D87E50"/>
+        <!-- lid rim -->
+        <rect x="36" y="76" width="68" height="9" rx="2"
+              fill="white" stroke="#D87E50" stroke-width="3.5"/>
+        <!-- cup body (tapered paper cup) -->
+        <path d="M 42 85 L 49 182 Q 49 188 55 188 L 85 188 Q 91 188 91 182 L 98 85 Z"
+              fill="white" stroke="#D87E50" stroke-width="4"/>
+        <!-- cardboard sleeve -->
+        <path d="M 45 122 L 47 158 Q 47 160 49 160 L 91 160 Q 93 160 93 158 L 95 122 Z"
+              fill="#D87E50"/>
+        <!-- sleeve highlight notch -->
+        <rect x="64" y="135" width="12" height="10" rx="2" fill="white" opacity="0.85"/>
+      </g>
+    </svg>
+  </div>
+
+</div>
+</body>
+</html>

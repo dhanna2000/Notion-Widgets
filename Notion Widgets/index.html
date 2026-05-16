@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notion Widgets</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Arial, sans-serif;
+    background: #FBF6F1;
+    color: #3a2a20;
+  }
+  .wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 48px 24px 64px;
+  }
+  header { margin-bottom: 32px; }
+  h1 {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -0.8px;
+    margin: 0 0 8px;
+    color: #D87E50;
+  }
+  .sub {
+    font-size: 15px;
+    opacity: 0.7;
+    margin: 0;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+  }
+  .card {
+    background: white;
+    border: 1px solid #F0DCCB;
+    border-radius: 20px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .frame-holder {
+    background: #FBF6F1;
+    height: 380px;
+    overflow: hidden;
+    border-bottom: 1px solid #F0DCCB;
+  }
+  .frame-holder iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+  }
+  .meta {
+    padding: 14px 16px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+  .name {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+  }
+  .copy {
+    border: none;
+    background: #D87E50;
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 8px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: 0.15s;
+    white-space: nowrap;
+  }
+  .copy:hover { transform: translateY(-1px); }
+  .copy.copied { background: #2f8a4a; }
+  footer {
+    margin-top: 40px;
+    font-size: 13px;
+    opacity: 0.55;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Notion Widgets</h1>
+    <p class="sub">Click any widget URL to copy it, then paste into a Notion <code>/embed</code> block.</p>
+  </header>
+  <div class="grid" id="grid"></div>
+  <footer>Served via Railway · transparent backgrounds, designed for Notion</footer>
+</div>
+<script>
+  const WIDGETS = [
+    { name: 'Pomodoro Timer',  file: 'pomodoro-widget.html' },
+    { name: 'Habit Tracker',   file: 'habit-tracker-widget.html' },
+    { name: 'Clock & Greeting',file: 'clock-widget.html' },
+    { name: 'Coffee Mugs',     file: 'coffee-mugs-widget.html' }
+  ];
+  const grid = document.getElementById('grid');
+  grid.innerHTML = WIDGETS.map(w => `
+    <div class="card">
+      <div class="frame-holder"><iframe src="${w.file}" loading="lazy"></iframe></div>
+      <div class="meta">
+        <div class="name">${w.name}</div>
+        <button class="copy" data-file="${w.file}">Copy URL</button>
+      </div>
+    </div>
+  `).join('');
+  document.querySelectorAll('.copy').forEach(btn => {
+    btn.onclick = async () => {
+      const url = new URL(btn.dataset.file, location.href).href;
+      try { await navigator.clipboard.writeText(url); } catch (e) {}
+      const original = btn.textContent;
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = original;
+        btn.classList.remove('copied');
+      }, 1500);
+    };
+  });
+</script>
+</body>
+</html>
