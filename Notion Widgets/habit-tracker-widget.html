@@ -13,26 +13,24 @@
     html { background: #191919; }
   }
   body {
-    margin: 0; padding: 0;
+    margin: 0;
     background: #D87E50;
-    border-radius: 6vw;
-    overflow: hidden;
-    width: 100%;
+    border-radius: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 16px;
+    box-sizing: border-box;
     min-height: 100vh;
     color: white;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Arial, sans-serif;
   }
-  /* ===== The scaler: holds the widget at its natural design size (360px wide)
-     and scales it visually to match the iframe width. Everything inside is in
-     fixed pixels; the transform handles all sizing. ===== */
-  .scaler {
-    width: 360px;
-    transform-origin: top left;
-    will-change: transform;
-  }
   .widget {
     width: 100%;
-    padding: 28px;
+    /* No max-width — widget expands to fill the iframe so habit names get more room */
+    padding: 24px;
+    background: transparent;
+    color: white;
     box-sizing: border-box;
   }
   .top {
@@ -95,7 +93,9 @@
   }
   .day-row, .habit {
     display: grid;
-    grid-template-columns: 1fr repeat(7, 26px);
+    /* Habit name column flexes (minmax 0 lets it shrink past content size when needed,
+       1fr lets it grow to fill extra width when the widget is wider). */
+    grid-template-columns: minmax(0, 1fr) repeat(7, 26px);
     gap: 5px;
     align-items: center;
   }
@@ -117,6 +117,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     padding-right: 6px;
+    min-width: 0;
   }
   .cell {
     width: 26px; height: 26px;
@@ -215,51 +216,26 @@
 </style>
 </head>
 <body>
-<div class="scaler">
-  <div class="widget">
-    <div class="top">
-      <div class="title" id="titleText">Habits</div>
-      <div class="top-right">
-        <button class="icon-btn" id="editBtn" aria-label="Edit habits" title="Edit habits">✎</button>
-        <button class="done-btn hidden" id="doneBtn">Done</button>
-        <div class="week-label" id="weekLabel">THIS WEEK</div>
-      </div>
+<div class="widget">
+  <div class="top">
+    <div class="title" id="titleText">Habits</div>
+    <div class="top-right">
+      <button class="icon-btn" id="editBtn" aria-label="Edit habits" title="Edit habits">✎</button>
+      <button class="done-btn hidden" id="doneBtn">Done</button>
+      <div class="week-label" id="weekLabel">THIS WEEK</div>
     </div>
-    <div class="card">
-      <div class="day-row" id="dayLabels"></div>
-      <div id="habits"></div>
-      <button class="add-btn hidden" id="addBtn">+ Add habit</button>
-      <div class="footer" id="footer">
-        <div class="stat"><span class="big" id="completedCount">0</span> / <span id="totalCount">0</span> done</div>
-        <div class="stat streak">🔥 <span class="big" id="streak">0</span></div>
-      </div>
+  </div>
+  <div class="card">
+    <div class="day-row" id="dayLabels"></div>
+    <div id="habits"></div>
+    <button class="add-btn hidden" id="addBtn">+ Add habit</button>
+    <div class="footer" id="footer">
+      <div class="stat"><span class="big" id="completedCount">0</span> / <span id="totalCount">0</span> done</div>
+      <div class="stat streak">🔥 <span class="big" id="streak">0</span></div>
     </div>
   </div>
 </div>
 <script>
-  // ===== Responsive scaling =====
-  // Widget is designed at 360px wide. We measure the iframe width and apply
-  // transform: scale() to fit. Everything — fonts, padding, borders, cells,
-  // border-radius — scales together as a single unit.
-  const DESIGN_WIDTH = 360;
-  const scaler = document.querySelector('.scaler');
-
-  function fit() {
-    const w = document.documentElement.clientWidth;
-    const scale = w / DESIGN_WIDTH;
-    scaler.style.transform = 'scale(' + scale + ')';
-    // Ensure body grows to contain the scaled widget so its rounded background
-    // covers the full visible area
-    const scaled = scaler.getBoundingClientRect().height;
-    document.body.style.minHeight = Math.max(scaled, document.documentElement.clientHeight) + 'px';
-  }
-
-  window.addEventListener('resize', fit);
-  if (window.ResizeObserver) {
-    new ResizeObserver(fit).observe(document.documentElement);
-  }
-
-  // ===== Habit tracker logic =====
   const HABITS_KEY = 'habit-tracker-habits-v2';
   const STATE_KEY = 'habit-tracker-state-v2';
   const MAX_HABITS = 6;
@@ -370,7 +346,6 @@
       }
     }
     document.getElementById('streak').textContent = streak;
-    fit();
   }
 
   function renderEditMode() {
@@ -422,7 +397,6 @@
         renderEditMode();
       };
     });
-    fit();
   }
 
   function setMode(m) {
@@ -452,7 +426,6 @@
   };
 
   setMode('view');
-  fit();
 </script>
 </body>
 </html>
