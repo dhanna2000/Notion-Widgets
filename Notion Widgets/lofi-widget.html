@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lofi Radio</title>
+<style>
+  html {
+    margin: 0; padding: 0;
+    background: #ffffff;
+  }
+  @media (prefers-color-scheme: dark) {
+    html { background: #191919; }
+  }
+  body {
+    margin: 0;
+    background: #D87E50;
+    border-radius: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 16px;
+    box-sizing: border-box;
+    min-height: 100vh;
+    color: white;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Arial, sans-serif;
+  }
+  .widget {
+    width: 100%;
+    max-width: 340px;
+    padding: 24px;
+    box-sizing: border-box;
+  }
+  .top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+  }
+  .title {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .live-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: white;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.5; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.2); }
+  }
+  .badge {
+    background: white;
+    color: #D87E50;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1px;
+  }
+
+  .vinyl-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+    position: relative;
+  }
+  .vinyl {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    background: radial-gradient(circle at center, #3D2418 25%, #2A1810 26%, #2A1810 27%, #3A2218 28%, #2A1810 30%, #3A2218 32%, #2A1810 34%, #3A2218 36%, #2A1810 38%, #3A2218 40%, #2A1810 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+    animation: spin 4s linear infinite;
+    animation-play-state: paused;
+  }
+  body.playing .vinyl { animation-play-state: running; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .label {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #D87E50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.15);
+    position: relative;
+  }
+  .label::after {
+    content: '';
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #2A1810;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+  }
+
+  .station {
+    text-align: center;
+    margin-bottom: 18px;
+  }
+  .station-name {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+    margin-bottom: 3px;
+  }
+  .station-sub {
+    font-size: 11px;
+    opacity: 0.75;
+    font-weight: 500;
+  }
+
+  .controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+  .ctrl {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.15s;
+    padding: 0;
+    font-family: inherit;
+  }
+  .ctrl:hover { background: rgba(255, 255, 255, 0.32); transform: translateY(-1px); }
+  .ctrl svg { width: 16px; height: 16px; fill: white; }
+  .ctrl.play {
+    width: 56px;
+    height: 56px;
+    background: white;
+  }
+  .ctrl.play svg { width: 22px; height: 22px; fill: #D87E50; }
+  .ctrl.play:hover { background: white; }
+  .ctrl:disabled { opacity: 0.4; cursor: wait; }
+
+  .volume-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .vol-icon { width: 18px; height: 18px; flex-shrink: 0; opacity: 0.85; }
+  .vol-icon svg { width: 100%; height: 100%; fill: white; }
+  input[type="range"] {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 999px;
+    outline: none;
+    margin: 0;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: white;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: white;
+    cursor: pointer;
+    border: none;
+  }
+
+  /* Hidden YouTube player */
+  #yt-player {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+
+<div id="yt-player"></div>
+
+<div class="widget">
+  <div class="top">
+    <div class="title"><span class="live-dot"></span>Lofi Radio</div>
+    <div class="badge" id="badge">PAUSED</div>
+  </div>
+
+  <div class="vinyl-wrap">
+    <div class="vinyl">
+      <div class="label">LO-FI</div>
+    </div>
+  </div>
+
+  <div class="station">
+    <div class="station-name" id="stationName">—</div>
+    <div class="station-sub">24/7 stream</div>
+  </div>
+
+  <div class="controls">
+    <button class="ctrl" id="prevBtn" aria-label="Previous station">
+      <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+    </button>
+    <button class="ctrl play" id="playBtn" aria-label="Play" disabled>
+      <svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+    </button>
+    <button class="ctrl" id="nextBtn" aria-label="Next station">
+      <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6z"/></svg>
+    </button>
+  </div>
+
+  <div class="volume-row">
+    <div class="vol-icon">
+      <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3a4.5 4.5 0 00-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+    </div>
+    <input type="range" id="volume" min="0" max="100" value="50">
+  </div>
+</div>
+
+<script>
+  // ===== Stations — edit / add YouTube video IDs here =====
+  const STATIONS = [
+    { name: 'Lofi Girl',         sub: 'beats to relax/study to', id: 'jfKfPfyJRdk' },
+    { name: 'Lofi Girl — Sleep', sub: 'beats to sleep/chill to', id: 'rUxyKA_-grg' }
+  ];
+  // ========================================================
+
+  const STORAGE_STATION = 'lofi-station-idx';
+  const STORAGE_VOLUME = 'lofi-volume';
+
+  let player = null;
+  let ready = false;
+  let isPlaying = false;
+  let currentIdx = 0;
+
+  try {
+    const saved = parseInt(localStorage.getItem(STORAGE_STATION), 10);
+    if (!isNaN(saved) && saved >= 0 && saved < STATIONS.length) currentIdx = saved;
+  } catch (e) {}
+
+  const playBtn  = document.getElementById('playBtn');
+  const playIcon = document.getElementById('playIcon');
+  const prevBtn  = document.getElementById('prevBtn');
+  const nextBtn  = document.getElementById('nextBtn');
+  const volume   = document.getElementById('volume');
+  const badge    = document.getElementById('badge');
+  const stationName = document.getElementById('stationName');
+
+  function renderStation() {
+    stationName.textContent = STATIONS[currentIdx].name;
+    document.querySelector('.station-sub').textContent = STATIONS[currentIdx].sub;
+  }
+  renderStation();
+
+  // Load YouTube IFrame API
+  const tag = document.createElement('script');
+  tag.src = 'https://www.youtube.com/iframe_api';
+  document.head.appendChild(tag);
+
+  window.onYouTubeIframeAPIReady = function() {
+    player = new YT.Player('yt-player', {
+      height: '1',
+      width: '1',
+      videoId: STATIONS[currentIdx].id,
+      playerVars: {
+        autoplay: 0,
+        controls: 0,
+        disablekb: 1,
+        modestbranding: 1,
+        playsinline: 1
+      },
+      events: {
+        onReady: onPlayerReady,
+        onStateChange: onPlayerStateChange,
+        onError: onPlayerError
+      }
+    });
+  };
+
+  function onPlayerReady() {
+    ready = true;
+    playBtn.disabled = false;
+    let v = 50;
+    try {
+      const saved = parseInt(localStorage.getItem(STORAGE_VOLUME), 10);
+      if (!isNaN(saved)) v = saved;
+    } catch (e) {}
+    volume.value = v;
+    player.setVolume(v);
+  }
+
+  function onPlayerStateChange(e) {
+    const s = e.data;
+    if (s === YT.PlayerState.PLAYING) {
+      isPlaying = true;
+      document.body.classList.add('playing');
+      playIcon.innerHTML = '<path d="M6 5h4v14H6zm8 0h4v14h-4z"/>';
+      badge.textContent = 'LIVE';
+    } else if (s === YT.PlayerState.BUFFERING) {
+      badge.textContent = 'LOADING';
+    } else {
+      isPlaying = false;
+      document.body.classList.remove('playing');
+      playIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+      badge.textContent = 'PAUSED';
+    }
+  }
+
+  function onPlayerError() {
+    badge.textContent = 'ERROR';
+    stationName.textContent = 'Stream unavailable';
+  }
+
+  playBtn.onclick = () => {
+    if (!ready) return;
+    if (isPlaying) player.pauseVideo();
+    else player.playVideo();
+  };
+
+  function switchStation(delta) {
+    if (!ready) return;
+    currentIdx = (currentIdx + delta + STATIONS.length) % STATIONS.length;
+    try { localStorage.setItem(STORAGE_STATION, currentIdx); } catch (e) {}
+    renderStation();
+    player.loadVideoById(STATIONS[currentIdx].id);
+    // loadVideoById auto-plays; if user had it paused, mirror that
+    if (!isPlaying) {
+      setTimeout(() => { try { player.pauseVideo(); } catch (e) {} }, 200);
+    }
+  }
+  prevBtn.onclick = () => switchStation(-1);
+  nextBtn.onclick = () => switchStation(1);
+
+  volume.oninput = () => {
+    const v = parseInt(volume.value, 10);
+    if (ready) player.setVolume(v);
+    try { localStorage.setItem(STORAGE_VOLUME, v); } catch (e) {}
+  };
+</script>
+</body>
+</html>
