@@ -3,202 +3,171 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Habit Tracker</title>
+<title>Clock & Greeting</title>
 <style>
-  html, body {
+  html {
     margin: 0; padding: 0;
-    background: transparent;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Arial, sans-serif;
+    background: #191919;
   }
   body {
+    margin: 0;
+    background: #D87E50;
+    border-radius: 24px;
     display: flex;
     justify-content: center;
     align-items: flex-start;
     padding: 16px;
     box-sizing: border-box;
     min-height: 100vh;
+    color: white;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Arial, sans-serif;
+    overflow: hidden;
   }
   .widget {
     width: 100%;
-    max-width: 360px;
-    padding: 24px;
-    border-radius: 28px;
-    background: #D87E50;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+    max-width: 340px;
+    padding: 28px 24px 24px;
+    background: transparent;
     color: white;
     box-sizing: border-box;
+    position: relative;
+    overflow: hidden;
   }
-  .top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 18px;
+  .widget::before {
+    content: '';
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    pointer-events: none;
   }
-  .title { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
-  .week-label {
-    background: white;
-    color: #D87E50;
-    padding: 5px 12px;
-    border-radius: 999px;
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 1px;
-  }
-  .card {
-    background: white;
-    border-radius: 22px;
-    padding: 18px;
-    color: #D87E50;
-  }
-  .day-row, .habit {
-    display: grid;
-    grid-template-columns: 1fr repeat(7, 26px);
-    gap: 5px;
-    align-items: center;
-  }
-  .day-row {
-    margin-bottom: 10px;
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-  .day-row > div { text-align: center; opacity: 0.4; }
-  .day-row > div.today { opacity: 1; }
-  .habit { margin-bottom: 8px; }
-  .habit:last-child { margin-bottom: 0; }
-  .habit-name {
+  .greeting {
     font-size: 13px;
     font-weight: 600;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    padding-right: 6px;
+    opacity: 0.85;
+    margin-bottom: 4px;
+    letter-spacing: 0.3px;
+    position: relative;
   }
-  .cell {
-    width: 26px; height: 26px;
-    border-radius: 9px;
-    border: 2px solid #F0D5C5;
+  .name {
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 20px;
+    letter-spacing: -0.5px;
+    position: relative;
+  }
+  .time-block {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 20px;
+    position: relative;
+  }
+  .time {
+    font-size: 56px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -2.5px;
+    font-variant-numeric: tabular-nums;
+  }
+  .ampm {
+    font-size: 15px;
+    font-weight: 700;
+    opacity: 0.75;
+  }
+  .date-card {
     background: white;
-    cursor: pointer;
-    transition: 0.15s;
-    padding: 0;
-  }
-  .cell:hover { border-color: #D87E50; transform: scale(1.08); }
-  .cell.done {
-    background: #D87E50;
-    border-color: #D87E50;
-  }
-  .cell.today { box-shadow: 0 0 0 2px white, 0 0 0 4px #D87E50; }
-  .footer {
-    margin-top: 14px;
-    padding-top: 14px;
-    border-top: 1px solid #F0D5C5;
+    color: #D87E50;
+    border-radius: 18px;
+    padding: 14px 16px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    color: #D87E50;
+    position: relative;
   }
-  .stat { font-size: 12px; font-weight: 600; opacity: 0.8; }
-  .stat .big {
-    font-size: 18px;
+  .date-left .day {
+    font-size: 11px;
     font-weight: 800;
-    opacity: 1;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    opacity: 0.6;
   }
-  .streak { font-weight: 700; }
+  .date-left .full {
+    font-size: 17px;
+    font-weight: 800;
+    margin-top: 3px;
+    letter-spacing: -0.3px;
+  }
+  .date-right {
+    font-size: 24px;
+    font-weight: 800;
+    background: #D87E50;
+    color: white;
+    min-width: 44px;
+    height: 44px;
+    padding: 0 8px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    box-sizing: border-box;
+  }
 </style>
 </head>
 <body>
 <div class="widget">
-  <div class="top">
-    <div class="title">Habits</div>
-    <div class="week-label">THIS WEEK</div>
+  <div class="greeting" id="greeting">Good morning</div>
+  <div class="name" id="name">Hello 👋</div>
+  <div class="time-block">
+    <div class="time" id="time">--:--</div>
+    <div class="ampm" id="ampm"></div>
   </div>
-  <div class="card">
-    <div class="day-row" id="dayLabels"></div>
-    <div id="habits"></div>
-    <div class="footer">
-      <div class="stat"><span class="big" id="completedCount">0</span> / <span id="totalCount">21</span> done</div>
-      <div class="stat streak">🔥 <span class="big" id="streak">0</span></div>
+  <div class="date-card">
+    <div class="date-left">
+      <div class="day" id="dayName">--</div>
+      <div class="full" id="monthName">--</div>
     </div>
+    <div class="date-right" id="dayNum">--</div>
   </div>
 </div>
 <script>
-  // ===== Customize your habits here =====
-  const HABITS = ['Workout', 'Read', 'No phone AM'];
-  // ======================================
-
-  const DAY_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
-  const STORAGE_KEY = 'habit-tracker-v1';
-
-  // Convert JS getDay() (Sun=0..Sat=6) to Mon=0..Sun=6
-  const now = new Date();
-  const todayIdx = (now.getDay() + 6) % 7;
-
-  // Track week to auto-reset on new week
-  function getWeekKey() {
-    const d = new Date();
-    d.setHours(0, 0, 0, 0);
-    const dayShift = (d.getDay() + 6) % 7;
-    d.setDate(d.getDate() - dayShift);
-    return d.toISOString().slice(0, 10);
+  // ===== Customize your name here =====
+  const USER_NAME = 'Hello 👋';
+  // ====================================
+  
+  const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  
+  document.getElementById('name').textContent = USER_NAME;
+  
+  function update() {
+    const now = new Date();
+    let h = now.getHours();
+    const m = now.getMinutes().toString().padStart(2, '0');
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12; if (h === 0) h = 12;
+    document.getElementById('time').textContent = h + ':' + m;
+    document.getElementById('ampm').textContent = ampm;
+    
+    const hour = now.getHours();
+    let greet;
+    if (hour < 5) greet = 'Late night,';
+    else if (hour < 12) greet = 'Good morning,';
+    else if (hour < 17) greet = 'Good afternoon,';
+    else if (hour < 21) greet = 'Good evening,';
+    else greet = 'Good night,';
+    document.getElementById('greeting').textContent = greet;
+    
+    document.getElementById('dayName').textContent = DAYS[now.getDay()];
+    document.getElementById('monthName').textContent = MONTHS[now.getMonth()];
+    document.getElementById('dayNum').textContent = now.getDate();
   }
-  const currentWeek = getWeekKey();
-
-  let state = {};
-  try {
-    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-    if (saved.week === currentWeek) state = saved.data || {};
-  } catch (e) {}
-  HABITS.forEach((_, i) => {
-    if (!state[i]) state[i] = [false, false, false, false, false, false, false];
-  });
-
-  function save() {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ week: currentWeek, data: state }));
-    } catch (e) {}
-  }
-
-  function render() {
-    const dayLabels = document.getElementById('dayLabels');
-    dayLabels.innerHTML = '<div></div>' + DAY_LABELS.map((d, i) =>
-      `<div class="${i === todayIdx ? 'today' : ''}">${d}</div>`
-    ).join('');
-
-    const habitsEl = document.getElementById('habits');
-    habitsEl.innerHTML = HABITS.map((h, hi) => {
-      return `<div class="habit">
-        <div class="habit-name">${h}</div>
-        ${state[hi].map((done, di) =>
-          `<button class="cell${done ? ' done' : ''}${di === todayIdx ? ' today' : ''}" data-h="${hi}" data-d="${di}" aria-label="${h} ${DAY_LABELS[di]}"></button>`
-        ).join('')}
-      </div>`;
-    }).join('');
-
-    habitsEl.querySelectorAll('.cell').forEach(c => {
-      c.onclick = () => {
-        const hi = +c.dataset.h, di = +c.dataset.d;
-        state[hi][di] = !state[hi][di];
-        save();
-        render();
-      };
-    });
-
-    let completed = 0;
-    HABITS.forEach((_, hi) => state[hi].forEach(d => { if (d) completed++; }));
-    document.getElementById('completedCount').textContent = completed;
-    document.getElementById('totalCount').textContent = HABITS.length * 7;
-
-    let streak = 0;
-    for (let d = todayIdx; d >= 0; d--) {
-      if (HABITS.every((_, hi) => state[hi][d])) streak++;
-      else break;
-    }
-    document.getElementById('streak').textContent = streak;
-  }
-
-  render();
+  update();
+  setInterval(update, 1000);
 </script>
 </body>
 </html>
