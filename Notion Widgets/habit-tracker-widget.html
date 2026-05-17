@@ -5,9 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Habit Tracker</title>
 <style>
+  /* ===== Responsive root sizing =====
+     1rem scales with iframe width.
+     At ~360px wide → 1rem = 16px (design baseline).
+     Clamp keeps it readable at extremes. */
   html {
     margin: 0; padding: 0;
     background: #ffffff;
+    font-size: clamp(11px, 4.44vw, 56px);
   }
   @media (prefers-color-scheme: dark) {
     html { background: #191919; }
@@ -15,11 +20,11 @@
   body {
     margin: 0;
     background: #D87E50;
-    border-radius: 24px;
+    border-radius: 1.5rem;
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    padding: 16px;
+    padding: 1rem;
     box-sizing: border-box;
     min-height: 100vh;
     color: white;
@@ -27,8 +32,7 @@
   }
   .widget {
     width: 100%;
-    max-width: 360px;
-    padding: 24px;
+    padding: 1.5rem;
     background: transparent;
     color: white;
     box-sizing: border-box;
@@ -37,32 +41,32 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 18px;
+    margin-bottom: 1.125rem;
   }
-  .title { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+  .title { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.02em; }
   .top-right {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 0.5rem;
   }
   .week-label {
     background: white;
     color: #D87E50;
-    padding: 5px 12px;
+    padding: 0.3125rem 0.75rem;
     border-radius: 999px;
-    font-size: 10px;
+    font-size: 0.625rem;
     font-weight: 800;
-    letter-spacing: 1px;
+    letter-spacing: 0.0625em;
   }
   .icon-btn {
-    width: 28px;
-    height: 28px;
+    width: 1.75rem;
+    height: 1.75rem;
     border-radius: 50%;
     background: rgba(255,255,255,0.2);
     border: none;
     color: white;
     cursor: pointer;
-    font-size: 13px;
+    font-size: 0.8125rem;
     font-weight: 800;
     display: flex;
     align-items: center;
@@ -77,49 +81,49 @@
     background: white;
     color: #D87E50;
     border: none;
-    padding: 6px 14px;
+    padding: 0.375rem 0.875rem;
     border-radius: 999px;
-    font-size: 12px;
+    font-size: 0.75rem;
     font-weight: 800;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.03em;
     cursor: pointer;
     font-family: inherit;
   }
   .card {
     background: white;
-    border-radius: 22px;
-    padding: 18px;
+    border-radius: 1.375rem;
+    padding: 1.125rem;
     color: #D87E50;
   }
   .day-row, .habit {
     display: grid;
-    grid-template-columns: 1fr repeat(7, 26px);
-    gap: 5px;
+    grid-template-columns: 1fr repeat(7, 1.625rem);
+    gap: 0.3125rem;
     align-items: center;
   }
   .day-row {
-    margin-bottom: 10px;
-    font-size: 10px;
+    margin-bottom: 0.625rem;
+    font-size: 0.625rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.03em;
   }
   .day-row > div { text-align: center; opacity: 0.4; }
   .day-row > div.today { opacity: 1; }
-  .habit { margin-bottom: 8px; }
+  .habit { margin-bottom: 0.5rem; }
   .habit:last-child { margin-bottom: 0; }
   .habit-name {
-    font-size: 13px;
+    font-size: 0.8125rem;
     font-weight: 600;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    padding-right: 6px;
+    padding-right: 0.375rem;
   }
   .cell {
-    width: 26px; height: 26px;
-    border-radius: 9px;
-    border: 2px solid #F0D5C5;
+    width: 1.625rem; height: 1.625rem;
+    border-radius: 0.5625rem;
+    border: 0.125rem solid #F0D5C5;
     background: white;
     cursor: pointer;
     transition: 0.15s;
@@ -130,21 +134,21 @@
     background: #D87E50;
     border-color: #D87E50;
   }
-  .cell.today { box-shadow: 0 0 0 2px white, 0 0 0 4px #D87E50; }
+  .cell.today { box-shadow: 0 0 0 0.125rem white, 0 0 0 0.25rem #D87E50; }
 
   /* ===== Edit mode ===== */
   .habit-edit {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
   }
   .habit-input {
     flex: 1;
-    border: 2px solid #F0D5C5;
-    border-radius: 10px;
-    padding: 8px 12px;
-    font-size: 13px;
+    border: 0.125rem solid #F0D5C5;
+    border-radius: 0.625rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8125rem;
     font-weight: 600;
     color: #D87E50;
     background: white;
@@ -155,13 +159,13 @@
   .habit-input:focus { border-color: #D87E50; }
   .habit-input::placeholder { color: #E5B89A; }
   .delete-btn {
-    width: 28px;
-    height: 28px;
+    width: 1.75rem;
+    height: 1.75rem;
     border-radius: 50%;
     border: none;
     background: #F0D5C5;
     color: #D87E50;
-    font-size: 14px;
+    font-size: 0.875rem;
     font-weight: 800;
     cursor: pointer;
     display: flex;
@@ -175,15 +179,15 @@
   .delete-btn:hover { background: #D87E50; color: white; }
   .add-btn {
     width: 100%;
-    border: 2px dashed #F0D5C5;
+    border: 0.125rem dashed #F0D5C5;
     background: transparent;
     color: #D87E50;
-    padding: 10px;
-    border-radius: 12px;
-    font-size: 13px;
+    padding: 0.625rem;
+    border-radius: 0.75rem;
+    font-size: 0.8125rem;
     font-weight: 700;
     cursor: pointer;
-    margin-top: 6px;
+    margin-top: 0.375rem;
     font-family: inherit;
     transition: 0.15s;
   }
@@ -194,17 +198,17 @@
   }
 
   .footer {
-    margin-top: 14px;
-    padding-top: 14px;
-    border-top: 1px solid #F0D5C5;
+    margin-top: 0.875rem;
+    padding-top: 0.875rem;
+    border-top: 0.0625rem solid #F0D5C5;
     display: flex;
     justify-content: space-between;
     align-items: center;
     color: #D87E50;
   }
-  .stat { font-size: 12px; font-weight: 600; opacity: 0.8; }
+  .stat { font-size: 0.75rem; font-weight: 600; opacity: 0.8; }
   .stat .big {
-    font-size: 18px;
+    font-size: 1.125rem;
     font-weight: 800;
     opacity: 1;
   }
@@ -239,7 +243,7 @@
   const DAY_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 
   const now = new Date();
-  const todayIdx = (now.getDay() + 6) % 7; // Mon=0..Sun=6
+  const todayIdx = (now.getDay() + 6) % 7;
 
   function getWeekKey() {
     const d = new Date();
@@ -253,7 +257,6 @@
     return 'h_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
   }
 
-  // ---- Load habits ----
   let habits;
   try {
     const saved = JSON.parse(localStorage.getItem(HABITS_KEY) || 'null');
@@ -267,7 +270,6 @@
     ];
   }
 
-  // ---- Load state ----
   let state = {};
   try {
     const saved = JSON.parse(localStorage.getItem(STATE_KEY) || '{}');
@@ -288,7 +290,6 @@
 
   let mode = 'view';
 
-  // ---- UI element refs ----
   const editBtn = document.getElementById('editBtn');
   const doneBtn = document.getElementById('doneBtn');
   const weekLabel = document.getElementById('weekLabel');
@@ -407,7 +408,6 @@
 
   editBtn.onclick = () => setMode('edit');
   doneBtn.onclick = () => {
-    // commit any focused input first
     document.activeElement?.blur?.();
     setMode('view');
   };
@@ -419,7 +419,6 @@
     saveHabits();
     saveState();
     renderEditMode();
-    // focus the new input for immediate editing
     setTimeout(() => {
       const inputs = habitsEl.querySelectorAll('.habit-input');
       const last = inputs[inputs.length - 1];
