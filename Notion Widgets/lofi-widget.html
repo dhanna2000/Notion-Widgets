@@ -24,12 +24,41 @@
     min-height: 100vh;
     color: white;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Arial, sans-serif;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ===== Faded background mugs ===== */
+  .bg-mug {
+    position: absolute;
+    pointer-events: none;
+    opacity: 0.1;
+    z-index: 0;
+  }
+  .bg-mug svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  .bg-mug-1 {
+    top: -28px;
+    right: -22px;
+    width: 130px;
+    transform: rotate(14deg);
+  }
+  .bg-mug-2 {
+    bottom: -38px;
+    left: -18px;
+    width: 120px;
+    transform: rotate(-16deg);
   }
   .widget {
     width: 100%;
-    max-width: 340px;
+    /* No max-width — widget fills the iframe; layout adapts via media query */
     padding: 24px;
     box-sizing: border-box;
+    position: relative;
+    z-index: 1;
   }
   .top {
     display: flex;
@@ -66,12 +95,19 @@
     letter-spacing: 1px;
   }
 
+  /* ===== Layout: column by default, row when wide ===== */
+  .layout {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+  }
+
   .vinyl-wrap {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-bottom: 20px;
-    position: relative;
+    flex-shrink: 0;
   }
   .vinyl {
     width: 160px;
@@ -112,9 +148,16 @@
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
   }
 
+  .right-side {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 0;
+  }
+
   .station {
     text-align: center;
-    margin-bottom: 18px;
   }
   .station-name {
     font-size: 15px;
@@ -133,7 +176,6 @@
     align-items: center;
     justify-content: center;
     gap: 14px;
-    margin-bottom: 18px;
   }
   .ctrl {
     width: 38px;
@@ -149,6 +191,7 @@
     transition: 0.15s;
     padding: 0;
     font-family: inherit;
+    flex-shrink: 0;
   }
   .ctrl:hover { background: rgba(255, 255, 255, 0.32); transform: translateY(-1px); }
   .ctrl svg { width: 16px; height: 16px; fill: white; }
@@ -177,6 +220,7 @@
     border-radius: 999px;
     outline: none;
     margin: 0;
+    min-width: 0;
   }
   input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
@@ -198,6 +242,24 @@
     border: none;
   }
 
+  /* ===== Wide layout: when iframe is 480px or wider, switch to horizontal ===== */
+  @media (min-width: 480px) {
+    .layout {
+      flex-direction: row;
+      align-items: center;
+      gap: 28px;
+    }
+    .right-side {
+      flex: 1;
+    }
+    .station {
+      text-align: left;
+    }
+    .controls {
+      justify-content: flex-start;
+    }
+  }
+
   /* Hidden YouTube player */
   #yt-player {
     position: absolute;
@@ -211,6 +273,43 @@
 </head>
 <body>
 
+<!-- ===== Faded background mugs ===== -->
+<div class="bg-mug bg-mug-1" aria-hidden="true">
+  <svg viewBox="0 0 140 200" xmlns="http://www.w3.org/2000/svg">
+    <g fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+      <!-- steam wisps -->
+      <path d="M 55 90 Q 50 75 55 60"/>
+      <path d="M 70 90 Q 75 75 70 60"/>
+      <path d="M 85 90 Q 80 75 85 60"/>
+      <!-- handle -->
+      <path d="M 110 120 Q 132 125 132 145 Q 132 165 110 170"/>
+      <!-- body -->
+      <rect x="22" y="100" width="92" height="80" rx="7"/>
+      <!-- coffee line -->
+      <line x1="28" y1="112" x2="108" y2="112"/>
+    </g>
+  </svg>
+</div>
+
+<div class="bg-mug bg-mug-2" aria-hidden="true">
+  <svg viewBox="0 0 140 200" xmlns="http://www.w3.org/2000/svg">
+    <g fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+      <!-- steam wisps -->
+      <path d="M 62 55 Q 57 40 62 25"/>
+      <path d="M 78 55 Q 83 40 78 25"/>
+      <!-- domed lid -->
+      <path d="M 38 76 Q 38 60 70 60 Q 102 60 102 76"/>
+      <!-- lid rim -->
+      <rect x="36" y="76" width="68" height="9" rx="2"/>
+      <!-- cup body -->
+      <path d="M 42 85 L 49 182 Q 49 188 55 188 L 85 188 Q 91 188 91 182 L 98 85"/>
+      <!-- sleeve lines -->
+      <line x1="46" y1="122" x2="94" y2="122"/>
+      <line x1="48" y1="158" x2="92" y2="158"/>
+    </g>
+  </svg>
+</div>
+
 <div id="yt-player"></div>
 
 <div class="widget">
@@ -219,34 +318,38 @@
     <div class="badge" id="badge">PAUSED</div>
   </div>
 
-  <div class="vinyl-wrap">
-    <div class="vinyl">
-      <div class="label">LO-FI</div>
+  <div class="layout">
+    <div class="vinyl-wrap">
+      <div class="vinyl">
+        <div class="label">LO-FI</div>
+      </div>
     </div>
-  </div>
 
-  <div class="station">
-    <div class="station-name" id="stationName">—</div>
-    <div class="station-sub">24/7 stream</div>
-  </div>
+    <div class="right-side">
+      <div class="station">
+        <div class="station-name" id="stationName">—</div>
+        <div class="station-sub">24/7 stream</div>
+      </div>
 
-  <div class="controls">
-    <button class="ctrl" id="prevBtn" aria-label="Previous station">
-      <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
-    </button>
-    <button class="ctrl play" id="playBtn" aria-label="Play" disabled>
-      <svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-    </button>
-    <button class="ctrl" id="nextBtn" aria-label="Next station">
-      <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6z"/></svg>
-    </button>
-  </div>
+      <div class="controls">
+        <button class="ctrl" id="prevBtn" aria-label="Previous station">
+          <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+        </button>
+        <button class="ctrl play" id="playBtn" aria-label="Play" disabled>
+          <svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+        <button class="ctrl" id="nextBtn" aria-label="Next station">
+          <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6z"/></svg>
+        </button>
+      </div>
 
-  <div class="volume-row">
-    <div class="vol-icon">
-      <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3a4.5 4.5 0 00-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+      <div class="volume-row">
+        <div class="vol-icon">
+          <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3a4.5 4.5 0 00-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+        </div>
+        <input type="range" id="volume" min="0" max="100" value="50">
+      </div>
     </div>
-    <input type="range" id="volume" min="0" max="100" value="50">
   </div>
 </div>
 
@@ -285,7 +388,6 @@
   }
   renderStation();
 
-  // Load YouTube IFrame API
   const tag = document.createElement('script');
   tag.src = 'https://www.youtube.com/iframe_api';
   document.head.appendChild(tag);
@@ -356,7 +458,6 @@
     try { localStorage.setItem(STORAGE_STATION, currentIdx); } catch (e) {}
     renderStation();
     player.loadVideoById(STATIONS[currentIdx].id);
-    // loadVideoById auto-plays; if user had it paused, mirror that
     if (!isPlaying) {
       setTimeout(() => { try { player.pauseVideo(); } catch (e) {} }, 200);
     }
