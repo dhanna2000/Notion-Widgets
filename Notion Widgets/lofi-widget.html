@@ -17,15 +17,13 @@
     background: #D87E50;
     border-radius: 24px;
     display: flex;
-    justify-content: center;
-    align-items: flex-start;
     padding: 16px;
     box-sizing: border-box;
     height: 100vh;
+    overflow: hidden;
     color: white;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Arial, sans-serif;
     position: relative;
-    overflow: hidden;
   }
 
   /* ===== Faded background mugs ===== */
@@ -35,51 +33,56 @@
     opacity: 0.1;
     z-index: 0;
   }
-  .bg-mug svg {
-    width: 100%;
-    height: auto;
-    display: block;
-  }
+  .bg-mug svg { width: 100%; height: auto; display: block; }
   .bg-mug-1 {
     top: -28px;
     right: -22px;
-    width: 130px;
+    width: clamp(80px, 18%, 140px);
     transform: rotate(14deg);
   }
   .bg-mug-2 {
     bottom: -38px;
     left: -18px;
-    width: 120px;
+    width: clamp(70px, 16%, 130px);
     transform: rotate(-16deg);
   }
+
   .widget {
     width: 100%;
-    /* No max-width — widget fills the iframe; layout adapts via media query */
-    padding: 24px;
+    padding: 20px;
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-height: 0;
+    container-type: inline-size;
     position: relative;
     z-index: 1;
   }
+
   .top {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 18px;
+    flex-shrink: 0;
+    gap: 12px;
   }
   .title {
-    font-size: 20px;
+    font-size: clamp(15px, 4cqw, 24px);
     font-weight: 700;
-    letter-spacing: -0.3px;
+    letter-spacing: -0.02em;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 0.4em;
+    min-width: 0;
   }
   .live-dot {
-    width: 8px;
-    height: 8px;
+    width: clamp(6px, 1.5cqw, 10px);
+    aspect-ratio: 1;
     border-radius: 50%;
     background: white;
     animation: pulse 2s ease-in-out infinite;
+    flex-shrink: 0;
   }
   @keyframes pulse {
     0%, 100% { opacity: 0.5; transform: scale(1); }
@@ -88,19 +91,23 @@
   .badge {
     background: white;
     color: #D87E50;
-    padding: 5px 12px;
+    padding: clamp(3px, 0.8cqw, 6px) clamp(8px, 2cqw, 14px);
     border-radius: 999px;
-    font-size: 10px;
+    font-size: clamp(8px, 2cqw, 12px);
     font-weight: 800;
-    letter-spacing: 1px;
+    letter-spacing: 0.1em;
+    flex-shrink: 0;
   }
 
-  /* ===== Layout: column by default, row when wide ===== */
-  .layout {
+  /* ===== Main layout ===== */
+  .main {
+    flex: 1;
+    min-height: 0;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 16px;
     align-items: center;
+    justify-content: center;
   }
 
   .vinyl-wrap {
@@ -110,39 +117,43 @@
     flex-shrink: 0;
   }
   .vinyl {
-    width: 160px;
-    height: 160px;
+    width: clamp(90px, 45cqw, 200px);
+    aspect-ratio: 1;
     border-radius: 50%;
-    background: radial-gradient(circle at center, #3D2418 25%, #2A1810 26%, #2A1810 27%, #3A2218 28%, #2A1810 30%, #3A2218 32%, #2A1810 34%, #3A2218 36%, #2A1810 38%, #3A2218 40%, #2A1810 100%);
+    background: radial-gradient(circle at center,
+      #3D2418 25%, #2A1810 26%, #2A1810 27%, #3A2218 28%,
+      #2A1810 30%, #3A2218 32%, #2A1810 34%, #3A2218 36%,
+      #2A1810 38%, #3A2218 40%, #2A1810 100%);
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.05);
     animation: spin 4s linear infinite;
     animation-play-state: paused;
   }
   body.playing .vinyl { animation-play-state: running; }
   @keyframes spin { to { transform: rotate(360deg); } }
   .label {
-    width: 60px;
-    height: 60px;
+    width: 38%;
+    aspect-ratio: 1;
     border-radius: 50%;
     background: #D87E50;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
-    font-size: 10px;
+    font-size: clamp(7px, 1.8cqw, 12px);
     font-weight: 800;
-    letter-spacing: 1.5px;
+    letter-spacing: 0.15em;
     box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.15);
     position: relative;
   }
   .label::after {
     content: '';
     position: absolute;
-    width: 6px;
-    height: 6px;
+    width: 10%;
+    aspect-ratio: 1;
     border-radius: 50%;
     background: #2A1810;
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
@@ -152,21 +163,19 @@
     width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 14px;
     min-width: 0;
   }
 
-  .station {
-    text-align: center;
-  }
+  .station { text-align: center; }
   .station-name {
-    font-size: 15px;
+    font-size: clamp(12px, 3.2cqw, 18px);
     font-weight: 700;
-    letter-spacing: -0.2px;
-    margin-bottom: 3px;
+    letter-spacing: -0.01em;
+    margin-bottom: 2px;
   }
   .station-sub {
-    font-size: 11px;
+    font-size: clamp(9px, 2.4cqw, 13px);
     opacity: 0.75;
     font-weight: 500;
   }
@@ -175,11 +184,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 14px;
+    gap: clamp(8px, 2.5cqw, 18px);
   }
   .ctrl {
-    width: 38px;
-    height: 38px;
+    width: clamp(28px, 8cqw, 50px);
+    aspect-ratio: 1;
     border-radius: 50%;
     border: none;
     background: rgba(255, 255, 255, 0.2);
@@ -194,28 +203,32 @@
     flex-shrink: 0;
   }
   .ctrl:hover { background: rgba(255, 255, 255, 0.32); transform: translateY(-1px); }
-  .ctrl svg { width: 16px; height: 16px; fill: white; }
+  .ctrl svg { width: 42%; height: 42%; fill: white; }
   .ctrl.play {
-    width: 56px;
-    height: 56px;
+    width: clamp(44px, 13cqw, 72px);
     background: white;
   }
-  .ctrl.play svg { width: 22px; height: 22px; fill: #D87E50; }
+  .ctrl.play svg { width: 38%; height: 38%; fill: #D87E50; }
   .ctrl.play:hover { background: white; }
   .ctrl:disabled { opacity: 0.4; cursor: wait; }
 
   .volume-row {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: clamp(6px, 1.5cqw, 12px);
   }
-  .vol-icon { width: 18px; height: 18px; flex-shrink: 0; opacity: 0.85; }
+  .vol-icon {
+    width: clamp(14px, 4cqw, 22px);
+    aspect-ratio: 1;
+    flex-shrink: 0;
+    opacity: 0.85;
+  }
   .vol-icon svg { width: 100%; height: 100%; fill: white; }
   input[type="range"] {
     flex: 1;
     -webkit-appearance: none;
     appearance: none;
-    height: 6px;
+    height: clamp(4px, 1.2cqw, 8px);
     background: rgba(255, 255, 255, 0.25);
     border-radius: 999px;
     outline: none;
@@ -242,25 +255,18 @@
     border: none;
   }
 
-  /* ===== Wide layout: when iframe is 480px or wider, switch to horizontal ===== */
-  @media (min-width: 480px) {
-    .layout {
+  /* ===== Wide layout via container query ===== */
+  @container (min-width: 480px) {
+    .main {
       flex-direction: row;
+      gap: clamp(16px, 4cqw, 32px);
       align-items: center;
-      gap: 28px;
     }
-    .right-side {
-      flex: 1;
-    }
-    .station {
-      text-align: left;
-    }
-    .controls {
-      justify-content: flex-start;
-    }
+    .right-side { flex: 1; }
+    .station { text-align: left; }
+    .controls { justify-content: flex-start; }
   }
 
-  /* Hidden YouTube player */
   #yt-player {
     position: absolute;
     top: -9999px;
@@ -273,19 +279,14 @@
 </head>
 <body>
 
-<!-- ===== Faded background mugs ===== -->
 <div class="bg-mug bg-mug-1" aria-hidden="true">
   <svg viewBox="0 0 140 200" xmlns="http://www.w3.org/2000/svg">
     <g fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
-      <!-- steam wisps -->
       <path d="M 55 90 Q 50 75 55 60"/>
       <path d="M 70 90 Q 75 75 70 60"/>
       <path d="M 85 90 Q 80 75 85 60"/>
-      <!-- handle -->
       <path d="M 110 120 Q 132 125 132 145 Q 132 165 110 170"/>
-      <!-- body -->
       <rect x="22" y="100" width="92" height="80" rx="7"/>
-      <!-- coffee line -->
       <line x1="28" y1="112" x2="108" y2="112"/>
     </g>
   </svg>
@@ -294,16 +295,11 @@
 <div class="bg-mug bg-mug-2" aria-hidden="true">
   <svg viewBox="0 0 140 200" xmlns="http://www.w3.org/2000/svg">
     <g fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
-      <!-- steam wisps -->
       <path d="M 62 55 Q 57 40 62 25"/>
       <path d="M 78 55 Q 83 40 78 25"/>
-      <!-- domed lid -->
       <path d="M 38 76 Q 38 60 70 60 Q 102 60 102 76"/>
-      <!-- lid rim -->
       <rect x="36" y="76" width="68" height="9" rx="2"/>
-      <!-- cup body -->
       <path d="M 42 85 L 49 182 Q 49 188 55 188 L 85 188 Q 91 188 91 182 L 98 85"/>
-      <!-- sleeve lines -->
       <line x1="46" y1="122" x2="94" y2="122"/>
       <line x1="48" y1="158" x2="92" y2="158"/>
     </g>
@@ -318,7 +314,7 @@
     <div class="badge" id="badge">PAUSED</div>
   </div>
 
-  <div class="layout">
+  <div class="main">
     <div class="vinyl-wrap">
       <div class="vinyl">
         <div class="label">LO-FI</div>
@@ -354,12 +350,10 @@
 </div>
 
 <script>
-  // ===== Stations — edit / add YouTube video IDs here =====
   const STATIONS = [
     { name: 'Lofi Girl',         sub: 'beats to relax/study to', id: 'jfKfPfyJRdk' },
     { name: 'Lofi Girl — Sleep', sub: 'beats to sleep/chill to', id: 'rUxyKA_-grg' }
   ];
-  // ========================================================
 
   const STORAGE_STATION = 'lofi-station-idx';
   const STORAGE_VOLUME = 'lofi-volume';
