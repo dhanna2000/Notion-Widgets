@@ -300,7 +300,7 @@
 
 <div class="widget">
   <div class="top">
-    <div class="title"><span class="live-dot"></span>Chill Radio</div>
+    <div class="title"><span class="live-dot"></span>Lofi Radio</div>
     <div class="badge" id="badge">PAUSED</div>
   </div>
 
@@ -340,36 +340,31 @@
 </div>
 
 <script>
-  // ===== Stations — SomaFM direct MP3 streams =====
-  // Each has a primary and a fallback URL for resilience
+  // ===== Stations — direct lofi hip hop MP3 streams =====
+  // Each has a primary and fallback URL for resilience
   const STATIONS = [
     {
-      name: 'Groove Salad',
-      sub: 'ambient + downtempo beats',
-      urls: ['https://ice5.somafm.com/groovesalad-128-mp3', 'https://ice3.somafm.com/groovesalad-128-mp3']
+      name: 'Chillsky',
+      sub: 'lofi hip-hop · chilled beats',
+      urls: ['https://chill.radioca.st/stream']
     },
     {
-      name: 'Drone Zone',
-      sub: 'atmospheric ambient music',
-      urls: ['https://ice5.somafm.com/dronezone-128-mp3', 'https://ice3.somafm.com/dronezone-128-mp3']
+      name: 'Box : Lofi',
+      sub: 'lofi study beats',
+      urls: ['https://boxradio-edge-00.streamafrica.net/lofi']
     },
     {
-      name: 'Fluid',
-      sub: 'instrumental hip-hop + liquid trap',
-      urls: ['https://ice5.somafm.com/fluid-128-mp3', 'https://ice3.somafm.com/fluid-128-mp3']
+      name: 'Lofi Radio',
+      sub: 'chill beats to relax/study',
+      urls: ['https://radio.streemlion.com:2335/stream']
     },
     {
-      name: 'Lush',
-      sub: 'sensuous female vocals',
-      urls: ['https://ice5.somafm.com/lush-128-mp3', 'https://ice3.somafm.com/lush-128-mp3']
-    },
-    {
-      name: 'Deep Space One',
-      sub: 'deep ambient electronic',
-      urls: ['https://ice5.somafm.com/deepspaceone-128-mp3', 'https://ice3.somafm.com/deepspaceone-128-mp3']
+      name: 'Lofi Café',
+      sub: 'cozy lofi atmospheres',
+      urls: ['https://stream.zeno.fm/0r0xa792kwzuv']
     }
   ];
-  // =================================================
+  // ========================================================
 
   const STORAGE_STATION = 'lofi-station-idx';
   const STORAGE_VOLUME  = 'lofi-volume';
