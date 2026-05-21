@@ -8,6 +8,7 @@
   html {
     margin: 0; padding: 0;
     background: #ffffff;
+    height: 100%;
   }
   @media (prefers-color-scheme: dark) {
     html { background: #191919; }
@@ -19,7 +20,7 @@
     display: flex;
     padding: 16px;
     box-sizing: border-box;
-    height: 100vh;
+    height: 100%;
     overflow: hidden;
     color: white;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Arial, sans-serif;
@@ -425,20 +426,96 @@
       document.body.classList.add('playing');
       playIcon.innerHTML = '<path d="M6 5h4v14H6zm8 0h4v14h-4z"/>';
       badge.textContent = 'LIVE';
+      clearError();
     } else if (s === YT.PlayerState.BUFFERING) {
-      badge.textContent = 'LOADING';
+      if (!errorState) badge.textContent = 'LOADING';
     } else {
       isPlaying = false;
       document.body.classList.remove('playing');
       playIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
-      badge.textContent = 'PAUSED';
+      if (!errorState) badge.textContent = 'PAUSED';
     }
   }
 
-  function onPlayerError() {
-    badge.textContent = 'ERROR';
-    stationName.textContent = 'Stream unavailable';
+  // ===== Auto-retry on error =====
+  // Strategy:
+  //   1. On error, try the SAME station with exponential backoff (2s, 4s, 8s, max 30s)
+  //   2. After 3 failures on same station, try the next station
+  //   3. Slow background ping every 60s while errored, in case Railway/YT recover
+  //   4. User can tap badge to retry immediately
+  let errorState = false;
+  let retryAttempts = 0;
+  let retryTimeout = null;
+  let recoveryInterval = null;
+
+  function clearTimers() {
+    if (retryTimeout) { clearTimeout(retryTimeout); retryTimeout = null; }
+    if (recoveryInterval) { clearInterval(recoveryInterval); recoveryInterval = null; }
   }
+
+  function attemptReload() {
+    if (!player || typeof player.loadVideoById !== 'function') return;
+    try {
+      player.loadVideoById(STATIONS[currentIdx].id);
+      if (!isPlaying) {
+        setTimeout(() => { try { player.pauseVideo(); } catch (e) {} }, 200);
+      }
+    } catch (e) {
+      // player not ready — schedule another try
+      scheduleRetry();
+    }
+  }
+
+  function scheduleRetry() {
+    clearTimers();
+    const delay = Math.min(2000 * Math.pow(2, retryAttempts), 30000);
+    badge.textContent = 'RETRYING';
+    retryTimeout = setTimeout(() => {
+      retryAttempts++;
+      // After 3 failures on the same station, jump to the next one
+      if (retryAttempts >= 3 && STATIONS.length > 1) {
+        currentIdx = (currentIdx + 1) % STATIONS.length;
+        try { localStorage.setItem(STORAGE_STATION, currentIdx); } catch (e) {}
+        renderStation();
+        retryAttempts = 0;
+      }
+      attemptReload();
+    }, delay);
+  }
+
+  function startRecoveryWatcher() {
+    if (recoveryInterval) return;
+    recoveryInterval = setInterval(() => {
+      if (errorState) attemptReload();
+    }, 60000);
+  }
+
+  function clearError() {
+    errorState = false;
+    retryAttempts = 0;
+    clearTimers();
+    badge.style.cursor = '';
+    badge.title = '';
+  }
+
+  function onPlayerError() {
+    errorState = true;
+    stationName.textContent = 'Stream unavailable';
+    badge.textContent = 'ERROR';
+    badge.style.cursor = 'pointer';
+    badge.title = 'Click to retry';
+    scheduleRetry();
+    startRecoveryWatcher();
+  }
+
+  // Tap the badge to retry immediately
+  badge.addEventListener('click', () => {
+    if (!errorState) return;
+    retryAttempts = 0;
+    clearTimers();
+    badge.textContent = 'RETRYING';
+    attemptReload();
+  });
 
   playBtn.onclick = () => {
     if (!ready) return;
@@ -451,6 +528,7 @@
     currentIdx = (currentIdx + delta + STATIONS.length) % STATIONS.length;
     try { localStorage.setItem(STORAGE_STATION, currentIdx); } catch (e) {}
     renderStation();
+    clearError();
     player.loadVideoById(STATIONS[currentIdx].id);
     if (!isPlaying) {
       setTimeout(() => { try { player.pauseVideo(); } catch (e) {} }, 200);
