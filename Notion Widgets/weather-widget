@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weather</title>
+<style>
+  html, body {
+    margin: 0; padding: 0;
+    background: transparent;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Arial, sans-serif;
+  }
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 12px;
+    box-sizing: border-box;
+  }
+  .widget {
+    display: flex;
+    align-items: center;
+    gap: clamp(8px, 4vw, 24px);
+    color: #D87E50;
+  }
+  .icon-wrap {
+    width: clamp(48px, 28vw, 140px);
+    aspect-ratio: 1;
+    flex-shrink: 0;
+  }
+  .icon-wrap svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    overflow: visible;
+  }
+  .temp {
+    font-size: clamp(32px, 18vw, 96px);
+    font-weight: 800;
+    letter-spacing: -0.05em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    transition: opacity 0.3s;
+  }
+  .temp.loading { opacity: 0.4; }
+
+  .icon-wrap path,
+  .icon-wrap circle { fill: #D87E50; }
+  .icon-wrap rect { fill: #D87E50; }
+  .ray { stroke: #D87E50; stroke-width: 6; stroke-linecap: round; fill: none; }
+  .ray-small { stroke: #D87E50; stroke-width: 4; stroke-linecap: round; fill: none; }
+
+  @keyframes rays-spin { to { transform: rotate(360deg); } }
+  .rays-group { transform-origin: 50px 50px; animation: rays-spin 30s linear infinite; }
+  .rays-group-small { transform-origin: 70px 22px; animation: rays-spin 30s linear infinite; }
+
+  @keyframes drift {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(2px); }
+  }
+  .cloud-drift { animation: drift 5s ease-in-out infinite; }
+
+  @keyframes rain-fall {
+    0%   { transform: translateY(-3px); opacity: 0; }
+    25%  { opacity: 1; }
+    100% { transform: translateY(14px); opacity: 0; }
+  }
+  .raindrop { animation: rain-fall 1.4s linear infinite; }
+  .raindrop.r2 { animation-delay: 0.45s; }
+  .raindrop.r3 { animation-delay: 0.9s; }
+
+  @keyframes snow-fall {
+    0%   { transform: translateY(-3px) translateX(0); opacity: 0; }
+    25%  { opacity: 1; }
+    100% { transform: translateY(14px) translateX(2px); opacity: 0; }
+  }
+  .snowflake { animation: snow-fall 2.2s linear infinite; }
+  .snowflake.s2 { animation-delay: 0.7s; }
+  .snowflake.s3 { animation-delay: 1.4s; }
+</style>
+</head>
+<body>
+<div class="widget">
+  <div class="icon-wrap" id="iconWrap"></div>
+  <div class="temp loading" id="temp">--°</div>
+</div>
+
+<script>
+  const ICONS = {
+    sun: '<svg viewBox="0 0 100 100">'
+      + '<g class="rays-group">'
+      + '<line class="ray" x1="50" y1="12" x2="50" y2="22"/>'
+      + '<line class="ray" x1="50" y1="78" x2="50" y2="88"/>'
+      + '<line class="ray" x1="12" y1="50" x2="22" y2="50"/>'
+      + '<line class="ray" x1="78" y1="50" x2="88" y2="50"/>'
+      + '<line class="ray" x1="23" y1="23" x2="30" y2="30"/>'
+      + '<line class="ray" x1="70" y1="70" x2="77" y2="77"/>'
+      + '<line class="ray" x1="77" y1="23" x2="70" y2="30"/>'
+      + '<line class="ray" x1="23" y1="77" x2="30" y2="70"/>'
+      + '</g>'
+      + '<circle cx="50" cy="50" r="18"/>'
+      + '</svg>',
+
+    cloud: '<svg viewBox="0 0 100 100">'
+      + '<g class="cloud-drift">'
+      + '<path d="M 27 65 Q 16 65 16 54 Q 16 44 26 43 Q 28 30 42 30 Q 50 22 60 28 Q 70 25 75 35 Q 86 36 86 48 Q 86 60 75 62 L 75 65 Z"/>'
+      + '<rect x="27" y="60" width="48" height="8" rx="4"/>'
+      + '</g>'
+      + '</svg>',
+
+    partlyCloudy: '<svg viewBox="0 0 100 100">'
+      + '<g class="rays-group-small">'
+      + '<line class="ray-small" x1="83" y1="22" x2="89" y2="22"/>'
+      + '<line class="ray-small" x1="79" y1="31" x2="83" y2="35"/>'
+      + '<line class="ray-small" x1="70" y1="35" x2="70" y2="41"/>'
+      + '<line class="ray-small" x1="61" y1="31" x2="57" y2="35"/>'
+      + '<line class="ray-small" x1="57" y1="22" x2="51" y2="22"/>'
+      + '<line class="ray-small" x1="61" y1="13" x2="57" y2="9"/>'
+      + '<line class="ray-small" x1="70" y1="9" x2="70" y2="3"/>'
+      + '<line class="ray-small" x1="79" y1="13" x2="83" y2="9"/>'
+      + '</g>'
+      + '<circle cx="70" cy="22" r="10"/>'
+      + '<g class="cloud-drift">'
+      + '<path d="M 20 75 Q 10 75 10 65 Q 10 55 19 54 Q 21 42 34 42 Q 41 35 50 41 Q 59 38 63 48 Q 73 50 73 60 Q 73 70 64 72 L 64 75 Z"/>'
+      + '<rect x="20" y="70" width="44" height="8" rx="4"/>'
+      + '</g>'
+      + '</svg>',
+
+    rain: '<svg viewBox="0 0 100 100">'
+      + '<g class="cloud-drift">'
+      + '<path d="M 22 58 Q 12 58 12 48 Q 12 39 21 38 Q 23 26 36 26 Q 44 18 54 24 Q 64 22 68 31 Q 79 32 79 43 Q 79 55 68 56 L 68 60 Z"/>'
+      + '<rect x="22" y="54" width="46" height="8" rx="4"/>'
+      + '</g>'
+      + '<path class="raindrop r1" d="M 32 70 L 30 78 L 34 78 Z"/>'
+      + '<path class="raindrop r2" d="M 47 70 L 45 78 L 49 78 Z"/>'
+      + '<path class="raindrop r3" d="M 62 70 L 60 78 L 64 78 Z"/>'
+      + '</svg>',
+
+    snow: '<svg viewBox="0 0 100 100">'
+      + '<g class="cloud-drift">'
+      + '<path d="M 22 58 Q 12 58 12 48 Q 12 39 21 38 Q 23 26 36 26 Q 44 18 54 24 Q 64 22 68 31 Q 79 32 79 43 Q 79 55 68 56 L 68 60 Z"/>'
+      + '<rect x="22" y="54" width="46" height="8" rx="4"/>'
+      + '</g>'
+      + makeSnowflake(32, 75, 's1')
+      + makeSnowflake(47, 75, 's2')
+      + makeSnowflake(62, 75, 's3')
+      + '</svg>'
+  };
+
+  function makeSnowflake(cx, cy, cls) {
+    return '<g class="snowflake ' + cls + '" transform="translate(' + cx + ' ' + cy + ')">'
+      + '<line x1="-4" y1="0" x2="4" y2="0" stroke="#D87E50" stroke-width="2.5" stroke-linecap="round"/>'
+      + '<line x1="0" y1="-4" x2="0" y2="4" stroke="#D87E50" stroke-width="2.5" stroke-linecap="round"/>'
+      + '<line x1="-3" y1="-3" x2="3" y2="3" stroke="#D87E50" stroke-width="2" stroke-linecap="round"/>'
+      + '<line x1="-3" y1="3" x2="3" y2="-3" stroke="#D87E50" stroke-width="2" stroke-linecap="round"/>'
+      + '</g>';
+  }
+
+  // ===== WMO weather code → icon =====
+  function codeToIcon(code) {
+    if (code === 0) return 'sun';
+    if (code === 1 || code === 2) return 'partlyCloudy';
+    if (code === 3 || code === 45 || code === 48) return 'cloud';
+    if ((code >= 71 && code <= 77) || code === 85 || code === 86) return 'snow';
+    return 'rain';
+  }
+
+  const iconWrap = document.getElementById('iconWrap');
+  const tempEl = document.getElementById('temp');
+
+  function render(data) {
+    iconWrap.innerHTML = ICONS[data.icon];
+    tempEl.textContent = data.temp + '°';
+    tempEl.classList.remove('loading');
+  }
+
+  iconWrap.innerHTML = ICONS.partlyCloudy;
+
+  // ===== Cache (30 min) =====
+  const CACHE_KEY = 'weather-cache-v1';
+  const CACHE_MS = 30 * 60 * 1000;
+
+  function getCached() {
+    try {
+      const c = JSON.parse(localStorage.getItem(CACHE_KEY));
+      if (c && Date.now() - c.t < CACHE_MS) return c.data;
+    } catch (e) {}
+    return null;
+  }
+  function setCached(data) {
+    try {
+      localStorage.setItem(CACHE_KEY, JSON.stringify({ t: Date.now(), data: data }));
+    } catch (e) {}
+  }
+
+  async function loadWeather() {
+    const cached = getCached();
+    if (cached) {
+      render(cached);
+      return;
+    }
+
+    try {
+      const locRes = await fetch('https://ipapi.co/json/');
+      if (!locRes.ok) throw new Error('location fetch failed');
+      const loc = await locRes.json();
+      if (!loc.latitude || !loc.longitude) throw new Error('no coords');
+
+      const isUS = loc.country_code === 'US';
+      const unit = isUS ? 'fahrenheit' : 'celsius';
+
+      const wRes = await fetch(
+        'https://api.open-meteo.com/v1/forecast?latitude=' + loc.latitude +
+        '&longitude=' + loc.longitude +
+        '&current=temperature_2m,weather_code&temperature_unit=' + unit
+      );
+      if (!wRes.ok) throw new Error('weather fetch failed');
+      const w = await wRes.json();
+      if (!w.current) throw new Error('no current weather');
+
+      const data = {
+        temp: Math.round(w.current.temperature_2m),
+        icon: codeToIcon(w.current.weather_code)
+      };
+
+      setCached(data);
+      render(data);
+    } catch (e) {
+      tempEl.textContent = '--°';
+      tempEl.classList.remove('loading');
+      console.error('Weather widget error:', e);
+    }
+  }
+
+  loadWeather();
+</script>
+</body>
+</html>
