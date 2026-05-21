@@ -8,61 +8,70 @@
   html {
     margin: 0; padding: 0;
     background: #ffffff;
+    height: 100%;
   }
   @media (prefers-color-scheme: dark) {
     html { background: #191919; }
   }
   body {
     margin: 0;
-    background: #D87E50;
-    border-radius: 24px;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    padding: 16px;
+    padding: 0;
     box-sizing: border-box;
-    min-height: 100vh;
+    height: 100%;
+    width: 100%;
     color: white;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Arial, sans-serif;
+    display: block;
   }
   .widget {
     width: 100%;
-    /* No max-width — widget expands to fill the iframe so habit names get more room */
-    padding: 24px;
-    background: transparent;
-    color: white;
+    height: 100%;
+    background: #D87E50;
+    border-radius: clamp(16px, 5cqw, 32px);
+    padding: clamp(16px, 4cqw, 28px);
     box-sizing: border-box;
+    container-type: inline-size;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(12px, 2.5cqw, 20px);
+    min-height: 0;
+    overflow: hidden;
   }
   .top {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 18px;
+    flex-shrink: 0;
+    gap: 12px;
   }
-  .title { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+  .title {
+    font-size: clamp(15px, 4cqw, 24px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
   .top-right {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: clamp(6px, 1.5cqw, 12px);
   }
   .week-label {
     background: white;
     color: #D87E50;
-    padding: 5px 12px;
+    padding: clamp(3px, 0.8cqw, 6px) clamp(8px, 2cqw, 14px);
     border-radius: 999px;
-    font-size: 10px;
+    font-size: clamp(8px, 2cqw, 12px);
     font-weight: 800;
-    letter-spacing: 1px;
+    letter-spacing: 0.1em;
   }
   .icon-btn {
-    width: 28px;
-    height: 28px;
+    width: clamp(22px, 5.5cqw, 34px);
+    aspect-ratio: 1;
     border-radius: 50%;
     background: rgba(255,255,255,0.2);
     border: none;
     color: white;
     cursor: pointer;
-    font-size: 13px;
+    font-size: clamp(10px, 2.8cqw, 15px);
     font-weight: 800;
     display: flex;
     align-items: center;
@@ -77,41 +86,44 @@
     background: white;
     color: #D87E50;
     border: none;
-    padding: 6px 14px;
+    padding: clamp(4px, 1cqw, 7px) clamp(10px, 2.5cqw, 16px);
     border-radius: 999px;
-    font-size: 12px;
+    font-size: clamp(10px, 2.5cqw, 14px);
     font-weight: 800;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.05em;
     cursor: pointer;
     font-family: inherit;
   }
   .card {
     background: white;
-    border-radius: 22px;
-    padding: 18px;
+    border-radius: clamp(14px, 4cqw, 24px);
+    padding: clamp(12px, 3cqw, 22px);
     color: #D87E50;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
   }
   .day-row, .habit {
     display: grid;
-    /* Habit name column flexes (minmax 0 lets it shrink past content size when needed,
-       1fr lets it grow to fill extra width when the widget is wider). */
-    grid-template-columns: minmax(0, 1fr) repeat(7, 26px);
-    gap: 5px;
+    grid-template-columns: minmax(0, 1fr) repeat(7, clamp(20px, 5.5cqw, 36px));
+    gap: clamp(3px, 0.8cqw, 7px);
     align-items: center;
   }
   .day-row {
-    margin-bottom: 10px;
-    font-size: 10px;
+    margin-bottom: clamp(6px, 1.5cqw, 12px);
+    font-size: clamp(8px, 2cqw, 12px);
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.05em;
   }
   .day-row > div { text-align: center; opacity: 0.4; }
   .day-row > div.today { opacity: 1; }
-  .habit { margin-bottom: 8px; }
+  .habit { margin-bottom: clamp(5px, 1.2cqw, 10px); }
   .habit:last-child { margin-bottom: 0; }
   .habit-name {
-    font-size: 13px;
+    font-size: clamp(11px, 2.8cqw, 16px);
     font-weight: 600;
     white-space: nowrap;
     overflow: hidden;
@@ -120,8 +132,9 @@
     min-width: 0;
   }
   .cell {
-    width: 26px; height: 26px;
-    border-radius: 9px;
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: clamp(6px, 1.6cqw, 11px);
     border: 2px solid #F0D5C5;
     background: white;
     cursor: pointer;
@@ -129,25 +142,22 @@
     padding: 0;
   }
   .cell:hover { border-color: #D87E50; transform: scale(1.08); }
-  .cell.done {
-    background: #D87E50;
-    border-color: #D87E50;
-  }
+  .cell.done { background: #D87E50; border-color: #D87E50; }
   .cell.today { box-shadow: 0 0 0 2px white, 0 0 0 4px #D87E50; }
 
-  /* ===== Edit mode ===== */
+  /* Edit mode */
   .habit-edit {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
+    gap: clamp(6px, 1.5cqw, 12px);
+    margin-bottom: clamp(5px, 1.2cqw, 10px);
   }
   .habit-input {
     flex: 1;
     border: 2px solid #F0D5C5;
-    border-radius: 10px;
-    padding: 8px 12px;
-    font-size: 13px;
+    border-radius: clamp(7px, 2cqw, 13px);
+    padding: clamp(6px, 1.8cqw, 11px) clamp(10px, 2.5cqw, 16px);
+    font-size: clamp(11px, 2.8cqw, 16px);
     font-weight: 600;
     color: #D87E50;
     background: white;
@@ -158,13 +168,13 @@
   .habit-input:focus { border-color: #D87E50; }
   .habit-input::placeholder { color: #E5B89A; }
   .delete-btn {
-    width: 28px;
-    height: 28px;
+    width: clamp(24px, 6cqw, 36px);
+    aspect-ratio: 1;
     border-radius: 50%;
     border: none;
     background: #F0D5C5;
     color: #D87E50;
-    font-size: 14px;
+    font-size: clamp(11px, 3cqw, 17px);
     font-weight: 800;
     cursor: pointer;
     display: flex;
@@ -181,33 +191,34 @@
     border: 2px dashed #F0D5C5;
     background: transparent;
     color: #D87E50;
-    padding: 10px;
-    border-radius: 12px;
-    font-size: 13px;
+    padding: clamp(8px, 2cqw, 14px);
+    border-radius: clamp(8px, 2.4cqw, 15px);
+    font-size: clamp(11px, 2.8cqw, 16px);
     font-weight: 700;
     cursor: pointer;
-    margin-top: 6px;
+    margin-top: clamp(4px, 1cqw, 8px);
     font-family: inherit;
     transition: 0.15s;
   }
   .add-btn:hover { border-color: #D87E50; background: #FCF5F0; }
-  .add-btn:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
+  .add-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
   .footer {
-    margin-top: 14px;
-    padding-top: 14px;
+    margin-top: clamp(10px, 2.5cqw, 18px);
+    padding-top: clamp(10px, 2.5cqw, 18px);
     border-top: 1px solid #F0D5C5;
     display: flex;
     justify-content: space-between;
     align-items: center;
     color: #D87E50;
   }
-  .stat { font-size: 12px; font-weight: 600; opacity: 0.8; }
+  .stat {
+    font-size: clamp(10px, 2.5cqw, 14px);
+    font-weight: 600;
+    opacity: 0.8;
+  }
   .stat .big {
-    font-size: 18px;
+    font-size: clamp(15px, 3.8cqw, 22px);
     font-weight: 800;
     opacity: 1;
   }
