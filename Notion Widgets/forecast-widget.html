@@ -22,7 +22,7 @@
     display: flex;
     align-items: center;
     gap: clamp(8px, 4vw, 24px);
-    color: #D87E50;
+    color: var(--theme);
   }
   .icon-wrap {
     width: clamp(48px, 28vw, 140px);
@@ -45,11 +45,22 @@
   }
   .temp.loading { opacity: 0.4; }
 
+  :root {
+    --theme: #D87E50;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --theme: #F0A074;
+    }
+  }
+
+  .widget { color: var(--theme); }
+
   .icon-wrap path,
-  .icon-wrap circle { fill: #D87E50; }
-  .icon-wrap rect { fill: #D87E50; }
-  .ray { stroke: #D87E50; stroke-width: 6; stroke-linecap: round; fill: none; }
-  .ray-small { stroke: #D87E50; stroke-width: 4; stroke-linecap: round; fill: none; }
+  .icon-wrap circle { fill: var(--theme); }
+  .icon-wrap rect { fill: var(--theme); }
+  .ray { stroke: var(--theme); stroke-width: 6; stroke-linecap: round; fill: none; }
+  .ray-small { stroke: var(--theme); stroke-width: 4; stroke-linecap: round; fill: none; }
 
   @keyframes rays-spin { to { transform: rotate(360deg); } }
   .rays-group { transform-origin: 50px 50px; animation: rays-spin 30s linear infinite; }
@@ -150,10 +161,10 @@
 
   function makeSnowflake(cx, cy, cls) {
     return '<g class="snowflake ' + cls + '" transform="translate(' + cx + ' ' + cy + ')">'
-      + '<line x1="-4" y1="0" x2="4" y2="0" stroke="#D87E50" stroke-width="2.5" stroke-linecap="round"/>'
-      + '<line x1="0" y1="-4" x2="0" y2="4" stroke="#D87E50" stroke-width="2.5" stroke-linecap="round"/>'
-      + '<line x1="-3" y1="-3" x2="3" y2="3" stroke="#D87E50" stroke-width="2" stroke-linecap="round"/>'
-      + '<line x1="-3" y1="3" x2="3" y2="-3" stroke="#D87E50" stroke-width="2" stroke-linecap="round"/>'
+      + '<line x1="-4" y1="0" x2="4" y2="0" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>'
+      + '<line x1="0" y1="-4" x2="0" y2="4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>'
+      + '<line x1="-3" y1="-3" x2="3" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'
+      + '<line x1="-3" y1="3" x2="3" y2="-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'
       + '</g>';
   }
 
