@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lofi Radio</title>
+<title>Chill Radio</title>
 <style>
   html {
     margin: 0; padding: 0;
@@ -27,7 +27,6 @@
     position: relative;
   }
 
-  /* ===== Faded background mugs ===== */
   .bg-mug {
     position: absolute;
     pointer-events: none;
@@ -100,7 +99,6 @@
     flex-shrink: 0;
   }
 
-  /* ===== Main layout ===== */
   .main {
     flex: 1;
     min-height: 0;
@@ -256,7 +254,6 @@
     border: none;
   }
 
-  /* ===== Wide layout via container query ===== */
   @container (min-width: 480px) {
     .main {
       flex-direction: row;
@@ -266,15 +263,6 @@
     .right-side { flex: 1; }
     .station { text-align: left; }
     .controls { justify-content: flex-start; }
-  }
-
-  #yt-player {
-    position: absolute;
-    top: -9999px;
-    left: -9999px;
-    width: 1px;
-    height: 1px;
-    pointer-events: none;
   }
 </style>
 </head>
@@ -307,11 +295,12 @@
   </svg>
 </div>
 
-<div id="yt-player"></div>
+<!-- Native HTML5 audio element does all the heavy lifting -->
+<audio id="audioEl" preload="none" crossorigin="anonymous"></audio>
 
 <div class="widget">
   <div class="top">
-    <div class="title"><span class="live-dot"></span>Lofi Radio</div>
+    <div class="title"><span class="live-dot"></span>Chill Radio</div>
     <div class="badge" id="badge">PAUSED</div>
   </div>
 
@@ -325,14 +314,14 @@
     <div class="right-side">
       <div class="station">
         <div class="station-name" id="stationName">—</div>
-        <div class="station-sub">24/7 stream</div>
+        <div class="station-sub" id="stationSub">24/7 stream</div>
       </div>
 
       <div class="controls">
         <button class="ctrl" id="prevBtn" aria-label="Previous station">
           <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
         </button>
-        <button class="ctrl play" id="playBtn" aria-label="Play" disabled>
+        <button class="ctrl play" id="playBtn" aria-label="Play">
           <svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
         </button>
         <button class="ctrl" id="nextBtn" aria-label="Next station">
@@ -351,197 +340,234 @@
 </div>
 
 <script>
+  // ===== Stations — SomaFM direct MP3 streams =====
+  // Each has a primary and a fallback URL for resilience
   const STATIONS = [
-    { name: 'Lofi Girl',         sub: 'beats to relax/study to', id: 'jfKfPfyJRdk' },
-    { name: 'Lofi Girl — Sleep', sub: 'beats to sleep/chill to', id: 'rUxyKA_-grg' }
+    {
+      name: 'Groove Salad',
+      sub: 'ambient + downtempo beats',
+      urls: ['https://ice5.somafm.com/groovesalad-128-mp3', 'https://ice3.somafm.com/groovesalad-128-mp3']
+    },
+    {
+      name: 'Drone Zone',
+      sub: 'atmospheric ambient music',
+      urls: ['https://ice5.somafm.com/dronezone-128-mp3', 'https://ice3.somafm.com/dronezone-128-mp3']
+    },
+    {
+      name: 'Fluid',
+      sub: 'instrumental hip-hop + liquid trap',
+      urls: ['https://ice5.somafm.com/fluid-128-mp3', 'https://ice3.somafm.com/fluid-128-mp3']
+    },
+    {
+      name: 'Lush',
+      sub: 'sensuous female vocals',
+      urls: ['https://ice5.somafm.com/lush-128-mp3', 'https://ice3.somafm.com/lush-128-mp3']
+    },
+    {
+      name: 'Deep Space One',
+      sub: 'deep ambient electronic',
+      urls: ['https://ice5.somafm.com/deepspaceone-128-mp3', 'https://ice3.somafm.com/deepspaceone-128-mp3']
+    }
   ];
+  // =================================================
 
   const STORAGE_STATION = 'lofi-station-idx';
-  const STORAGE_VOLUME = 'lofi-volume';
+  const STORAGE_VOLUME  = 'lofi-volume';
 
-  let player = null;
-  let ready = false;
-  let isPlaying = false;
   let currentIdx = 0;
+  let currentUrlIdx = 0;
+  let isPlaying = false;
+  let errorState = false;
+  let retryAttempts = 0;
+  let retryTimeout = null;
+  let recoveryInterval = null;
 
   try {
     const saved = parseInt(localStorage.getItem(STORAGE_STATION), 10);
     if (!isNaN(saved) && saved >= 0 && saved < STATIONS.length) currentIdx = saved;
   } catch (e) {}
 
-  const playBtn  = document.getElementById('playBtn');
-  const playIcon = document.getElementById('playIcon');
-  const prevBtn  = document.getElementById('prevBtn');
-  const nextBtn  = document.getElementById('nextBtn');
-  const volume   = document.getElementById('volume');
-  const badge    = document.getElementById('badge');
+  const audioEl     = document.getElementById('audioEl');
+  const playBtn     = document.getElementById('playBtn');
+  const playIcon    = document.getElementById('playIcon');
+  const prevBtn     = document.getElementById('prevBtn');
+  const nextBtn     = document.getElementById('nextBtn');
+  const volume      = document.getElementById('volume');
+  const badge       = document.getElementById('badge');
   const stationName = document.getElementById('stationName');
+  const stationSub  = document.getElementById('stationSub');
 
   function renderStation() {
     stationName.textContent = STATIONS[currentIdx].name;
-    document.querySelector('.station-sub').textContent = STATIONS[currentIdx].sub;
+    stationSub.textContent  = STATIONS[currentIdx].sub;
   }
   renderStation();
 
-  const tag = document.createElement('script');
-  tag.src = 'https://www.youtube.com/iframe_api';
-  document.head.appendChild(tag);
+  // Restore volume
+  let v = 50;
+  try {
+    const saved = parseInt(localStorage.getItem(STORAGE_VOLUME), 10);
+    if (!isNaN(saved)) v = saved;
+  } catch (e) {}
+  volume.value = v;
+  audioEl.volume = v / 100;
 
-  window.onYouTubeIframeAPIReady = function() {
-    player = new YT.Player('yt-player', {
-      height: '1',
-      width: '1',
-      videoId: STATIONS[currentIdx].id,
-      playerVars: {
-        autoplay: 0,
-        controls: 0,
-        disablekb: 1,
-        modestbranding: 1,
-        playsinline: 1
-      },
-      events: {
-        onReady: onPlayerReady,
-        onStateChange: onPlayerStateChange,
-        onError: onPlayerError
-      }
-    });
-  };
-
-  function onPlayerReady() {
-    ready = true;
-    playBtn.disabled = false;
-    let v = 50;
-    try {
-      const saved = parseInt(localStorage.getItem(STORAGE_VOLUME), 10);
-      if (!isNaN(saved)) v = saved;
-    } catch (e) {}
-    volume.value = v;
-    player.setVolume(v);
+  function setSource() {
+    audioEl.src = STATIONS[currentIdx].urls[currentUrlIdx];
   }
-
-  function onPlayerStateChange(e) {
-    const s = e.data;
-    if (s === YT.PlayerState.PLAYING) {
-      isPlaying = true;
-      document.body.classList.add('playing');
-      playIcon.innerHTML = '<path d="M6 5h4v14H6zm8 0h4v14h-4z"/>';
-      badge.textContent = 'LIVE';
-      clearError();
-    } else if (s === YT.PlayerState.BUFFERING) {
-      if (!errorState) badge.textContent = 'LOADING';
-    } else {
-      isPlaying = false;
-      document.body.classList.remove('playing');
-      playIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
-      if (!errorState) badge.textContent = 'PAUSED';
-    }
-  }
-
-  // ===== Auto-retry on error =====
-  // Strategy:
-  //   1. On error, try the SAME station with exponential backoff (2s, 4s, 8s, max 30s)
-  //   2. After 3 failures on same station, try the next station
-  //   3. Slow background ping every 60s while errored, in case Railway/YT recover
-  //   4. User can tap badge to retry immediately
-  let errorState = false;
-  let retryAttempts = 0;
-  let retryTimeout = null;
-  let recoveryInterval = null;
+  setSource();
 
   function clearTimers() {
-    if (retryTimeout) { clearTimeout(retryTimeout); retryTimeout = null; }
-    if (recoveryInterval) { clearInterval(recoveryInterval); recoveryInterval = null; }
+    if (retryTimeout)    { clearTimeout(retryTimeout); retryTimeout = null; }
+    if (recoveryInterval){ clearInterval(recoveryInterval); recoveryInterval = null; }
   }
 
-  function attemptReload() {
-    if (!player || typeof player.loadVideoById !== 'function') return;
-    try {
-      player.loadVideoById(STATIONS[currentIdx].id);
-      if (!isPlaying) {
-        setTimeout(() => { try { player.pauseVideo(); } catch (e) {} }, 200);
-      }
-    } catch (e) {
-      // player not ready — schedule another try
-      scheduleRetry();
+  function clearError() {
+    errorState = false;
+    retryAttempts = 0;
+    currentUrlIdx = 0;
+    clearTimers();
+    badge.style.cursor = '';
+    badge.title = '';
+  }
+
+  function setBadge(text, isError) {
+    badge.textContent = text;
+    if (isError) {
+      badge.style.cursor = 'pointer';
+      badge.title = 'Click to retry';
+    } else {
+      badge.style.cursor = '';
+      badge.title = '';
     }
+  }
+
+  // ===== Audio event handlers =====
+  audioEl.addEventListener('playing', () => {
+    isPlaying = true;
+    document.body.classList.add('playing');
+    playIcon.innerHTML = '<path d="M6 5h4v14H6zm8 0h4v14h-4z"/>';
+    setBadge('LIVE');
+    clearError();
+  });
+
+  audioEl.addEventListener('pause', () => {
+    isPlaying = false;
+    document.body.classList.remove('playing');
+    playIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+    if (!errorState) setBadge('PAUSED');
+  });
+
+  audioEl.addEventListener('waiting', () => {
+    if (!errorState) setBadge('LOADING');
+  });
+
+  audioEl.addEventListener('error', () => handleError());
+  audioEl.addEventListener('stalled', () => {
+    // Don't immediately treat as error — sometimes streams briefly stall
+    // Only escalate if we don't recover within a few seconds
+    setTimeout(() => {
+      if (!isPlaying && audioEl.src) handleError();
+    }, 4000);
+  });
+
+  function handleError() {
+    if (errorState) return; // already handling
+    errorState = true;
+    console.log('Lofi widget: audio error on', STATIONS[currentIdx].name, audioEl.src);
+
+    // Try the fallback URL for the same station first
+    if (currentUrlIdx < STATIONS[currentIdx].urls.length - 1) {
+      currentUrlIdx++;
+      setSource();
+      setBadge('RETRYING', true);
+      audioEl.play().catch(() => scheduleRetry());
+      return;
+    }
+
+    // Exhausted URLs for this station; back off and try again
+    setBadge('RETRYING', true);
+    scheduleRetry();
+    startRecoveryWatcher();
   }
 
   function scheduleRetry() {
-    clearTimers();
+    clearTimeout(retryTimeout);
     const delay = Math.min(2000 * Math.pow(2, retryAttempts), 30000);
-    badge.textContent = 'RETRYING';
     retryTimeout = setTimeout(() => {
       retryAttempts++;
-      // After 3 failures on the same station, jump to the next one
+      // After 3 attempts on this station, jump to the next one
       if (retryAttempts >= 3 && STATIONS.length > 1) {
         currentIdx = (currentIdx + 1) % STATIONS.length;
+        currentUrlIdx = 0;
+        retryAttempts = 0;
         try { localStorage.setItem(STORAGE_STATION, currentIdx); } catch (e) {}
         renderStation();
-        retryAttempts = 0;
+      } else {
+        currentUrlIdx = 0;
       }
-      attemptReload();
+      setSource();
+      audioEl.play().catch(() => {});
     }, delay);
   }
 
   function startRecoveryWatcher() {
     if (recoveryInterval) return;
     recoveryInterval = setInterval(() => {
-      if (errorState) attemptReload();
+      if (errorState && !isPlaying) {
+        // Quietly attempt to reload in the background
+        setSource();
+        audioEl.play().catch(() => {});
+      }
     }, 60000);
   }
 
-  function clearError() {
-    errorState = false;
-    retryAttempts = 0;
-    clearTimers();
-    badge.style.cursor = '';
-    badge.title = '';
-  }
-
-  function onPlayerError() {
-    errorState = true;
-    stationName.textContent = 'Stream unavailable';
-    badge.textContent = 'ERROR';
-    badge.style.cursor = 'pointer';
-    badge.title = 'Click to retry';
-    scheduleRetry();
-    startRecoveryWatcher();
-  }
-
-  // Tap the badge to retry immediately
-  badge.addEventListener('click', () => {
-    if (!errorState) return;
-    retryAttempts = 0;
-    clearTimers();
-    badge.textContent = 'RETRYING';
-    attemptReload();
-  });
-
+  // ===== Controls =====
   playBtn.onclick = () => {
-    if (!ready) return;
-    if (isPlaying) player.pauseVideo();
-    else player.playVideo();
+    if (isPlaying) {
+      audioEl.pause();
+    } else {
+      // If we're in error state, clear it and try fresh
+      if (errorState) {
+        clearError();
+        currentUrlIdx = 0;
+        setSource();
+      }
+      const p = audioEl.play();
+      if (p && p.catch) p.catch(() => handleError());
+    }
   };
 
   function switchStation(delta) {
-    if (!ready) return;
     currentIdx = (currentIdx + delta + STATIONS.length) % STATIONS.length;
+    currentUrlIdx = 0;
     try { localStorage.setItem(STORAGE_STATION, currentIdx); } catch (e) {}
     renderStation();
     clearError();
-    player.loadVideoById(STATIONS[currentIdx].id);
-    if (!isPlaying) {
-      setTimeout(() => { try { player.pauseVideo(); } catch (e) {} }, 200);
+    setSource();
+    if (isPlaying) {
+      const p = audioEl.play();
+      if (p && p.catch) p.catch(() => handleError());
     }
   }
   prevBtn.onclick = () => switchStation(-1);
   nextBtn.onclick = () => switchStation(1);
 
   volume.oninput = () => {
-    const v = parseInt(volume.value, 10);
-    if (ready) player.setVolume(v);
-    try { localStorage.setItem(STORAGE_VOLUME, v); } catch (e) {}
+    const val = parseInt(volume.value, 10);
+    audioEl.volume = val / 100;
+    try { localStorage.setItem(STORAGE_VOLUME, val); } catch (e) {}
   };
+
+  // Tap badge to retry immediately when errored
+  badge.addEventListener('click', () => {
+    if (!errorState) return;
+    clearError();
+    currentUrlIdx = 0;
+    setSource();
+    setBadge('RETRYING', true);
+    audioEl.play().catch(() => handleError());
+  });
 </script>
 </body>
 </html>
