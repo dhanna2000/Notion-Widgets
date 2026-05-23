@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Chill Radio</title>
+<title>Lofi Radio</title>
 <style>
   html {
     margin: 0; padding: 0;
@@ -15,16 +15,13 @@
   }
   body {
     margin: 0;
-    background: #D87E50;
-    border-radius: 24px;
-    display: flex;
-    padding: 16px;
+    padding: 0;
     box-sizing: border-box;
     height: 100%;
-    overflow: hidden;
+    width: 100%;
     color: white;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Arial, sans-serif;
-    position: relative;
+    display: block;
   }
 
   .bg-mug {
@@ -49,7 +46,10 @@
 
   .widget {
     width: 100%;
-    padding: 20px;
+    height: 100%;
+    background: #D87E50;
+    border-radius: clamp(16px, 5cqw, 32px);
+    padding: clamp(16px, 4cqw, 28px);
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -57,7 +57,7 @@
     min-height: 0;
     container-type: inline-size;
     position: relative;
-    z-index: 1;
+    overflow: hidden;
   }
 
   .top {
@@ -66,6 +66,8 @@
     align-items: center;
     flex-shrink: 0;
     gap: 12px;
+    position: relative;
+    z-index: 1;
   }
   .title {
     font-size: clamp(15px, 4cqw, 24px);
@@ -107,6 +109,8 @@
     gap: 16px;
     align-items: center;
     justify-content: center;
+    position: relative;
+    z-index: 1;
   }
 
   .vinyl-wrap {
@@ -166,7 +170,7 @@
     min-width: 0;
   }
 
-  .station { text-align: center; }
+  .station { text-align: center; min-width: 0; }
   .station-name {
     font-size: clamp(12px, 3.2cqw, 18px);
     font-weight: 700;
@@ -177,6 +181,9 @@
     font-size: clamp(9px, 2.4cqw, 13px);
     opacity: 0.75;
     font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .controls {
@@ -264,41 +271,55 @@
     .station { text-align: left; }
     .controls { justify-content: flex-start; }
   }
+
+  /* Hidden SoundCloud player */
+  #sc-frame {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    border: 0;
+    pointer-events: none;
+  }
 </style>
 </head>
 <body>
 
-<div class="bg-mug bg-mug-1" aria-hidden="true">
-  <svg viewBox="0 0 140 200" xmlns="http://www.w3.org/2000/svg">
-    <g fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M 55 90 Q 50 75 55 60"/>
-      <path d="M 70 90 Q 75 75 70 60"/>
-      <path d="M 85 90 Q 80 75 85 60"/>
-      <path d="M 110 120 Q 132 125 132 145 Q 132 165 110 170"/>
-      <rect x="22" y="100" width="92" height="80" rx="7"/>
-      <line x1="28" y1="112" x2="108" y2="112"/>
-    </g>
-  </svg>
-</div>
-
-<div class="bg-mug bg-mug-2" aria-hidden="true">
-  <svg viewBox="0 0 140 200" xmlns="http://www.w3.org/2000/svg">
-    <g fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M 62 55 Q 57 40 62 25"/>
-      <path d="M 78 55 Q 83 40 78 25"/>
-      <path d="M 38 76 Q 38 60 70 60 Q 102 60 102 76"/>
-      <rect x="36" y="76" width="68" height="9" rx="2"/>
-      <path d="M 42 85 L 49 182 Q 49 188 55 188 L 85 188 Q 91 188 91 182 L 98 85"/>
-      <line x1="46" y1="122" x2="94" y2="122"/>
-      <line x1="48" y1="158" x2="92" y2="158"/>
-    </g>
-  </svg>
-</div>
-
-<!-- Native HTML5 audio element does all the heavy lifting -->
-<audio id="audioEl" preload="none" crossorigin="anonymous"></audio>
+<!-- Hidden SoundCloud player. The src loads the first playlist; the Widget API drives everything. -->
+<iframe id="sc-frame" allow="autoplay"
+  src="https://w.soundcloud.com/player/?url=https%3A%2F%2Fsoundcloud.com%2Flofi_girl%2Fsets%2Flofi-reading-2024&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&visual=false&buying=false&sharing=false&download=false">
+</iframe>
 
 <div class="widget">
+
+  <div class="bg-mug bg-mug-1" aria-hidden="true">
+    <svg viewBox="0 0 140 200" xmlns="http://www.w3.org/2000/svg">
+      <g fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M 55 90 Q 50 75 55 60"/>
+        <path d="M 70 90 Q 75 75 70 60"/>
+        <path d="M 85 90 Q 80 75 85 60"/>
+        <path d="M 110 120 Q 132 125 132 145 Q 132 165 110 170"/>
+        <rect x="22" y="100" width="92" height="80" rx="7"/>
+        <line x1="28" y1="112" x2="108" y2="112"/>
+      </g>
+    </svg>
+  </div>
+
+  <div class="bg-mug bg-mug-2" aria-hidden="true">
+    <svg viewBox="0 0 140 200" xmlns="http://www.w3.org/2000/svg">
+      <g fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M 62 55 Q 57 40 62 25"/>
+        <path d="M 78 55 Q 83 40 78 25"/>
+        <path d="M 38 76 Q 38 60 70 60 Q 102 60 102 76"/>
+        <rect x="36" y="76" width="68" height="9" rx="2"/>
+        <path d="M 42 85 L 49 182 Q 49 188 55 188 L 85 188 Q 91 188 91 182 L 98 85"/>
+        <line x1="46" y1="122" x2="94" y2="122"/>
+        <line x1="48" y1="158" x2="92" y2="158"/>
+      </g>
+    </svg>
+  </div>
+
   <div class="top">
     <div class="title"><span class="live-dot"></span>Lofi Radio</div>
     <div class="badge" id="badge">PAUSED</div>
@@ -314,17 +335,17 @@
     <div class="right-side">
       <div class="station">
         <div class="station-name" id="stationName">—</div>
-        <div class="station-sub" id="stationSub">24/7 stream</div>
+        <div class="station-sub" id="stationSub">Lofi Girl playlist</div>
       </div>
 
       <div class="controls">
-        <button class="ctrl" id="prevBtn" aria-label="Previous station">
+        <button class="ctrl" id="prevBtn" aria-label="Previous track">
           <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
         </button>
-        <button class="ctrl play" id="playBtn" aria-label="Play">
+        <button class="ctrl play" id="playBtn" aria-label="Play" disabled>
           <svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
         </button>
-        <button class="ctrl" id="nextBtn" aria-label="Next station">
+        <button class="ctrl" id="nextBtn" aria-label="Next track">
           <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6z"/></svg>
         </button>
       </div>
@@ -339,50 +360,33 @@
   </div>
 </div>
 
+<script src="https://w.soundcloud.com/player/api.js" onerror="window.__scFailed=true"></script>
 <script>
-  // ===== Stations — direct lofi hip hop MP3 streams =====
-  // Each has a primary and fallback URL for resilience
-  const STATIONS = [
-    {
-      name: 'Chillsky',
-      sub: 'lofi hip-hop · chilled beats',
-      urls: ['https://chill.radioca.st/stream']
-    },
-    {
-      name: 'Box : Lofi',
-      sub: 'lofi study beats',
-      urls: ['https://boxradio-edge-00.streamafrica.net/lofi']
-    },
-    {
-      name: 'Lofi Radio',
-      sub: 'chill beats to relax/study',
-      urls: ['https://radio.streemlion.com:2335/stream']
-    },
-    {
-      name: 'Lofi Café',
-      sub: 'cozy lofi atmospheres',
-      urls: ['https://stream.zeno.fm/0r0xa792kwzuv']
-    }
+  // ===== Playlists — official Lofi Girl SoundCloud sets =====
+  // All instrumental / no-rap. Swap any URL for another SoundCloud set.
+  const PLAYLISTS = [
+    { name: 'Reading Lofi',  sub: 'mellow instrumental beats',  url: 'https://soundcloud.com/lofi_girl/sets/lofi-reading-2024' },
+    { name: 'Peaceful Piano',sub: 'music to focus / study to',  url: 'https://soundcloud.com/lofi_girl/sets/peaceful-piano-music-to-focus' },
+    { name: 'Chill Guitar',  sub: 'warm acoustic lofi',         url: 'https://soundcloud.com/lofi_girl/sets/chill-guitar' },
+    { name: 'Synthwave',     sub: 'beats to chill / game to',   url: 'https://soundcloud.com/lofi_girl/sets/synthwave-beats-to-chill-game' }
   ];
-  // ========================================================
+  // ==========================================================
 
-  const STORAGE_STATION = 'lofi-station-idx';
-  const STORAGE_VOLUME  = 'lofi-volume';
+  const STORAGE_PLAYLIST = 'lofi-playlist-idx';
+  const STORAGE_VOLUME   = 'lofi-volume';
 
-  let currentIdx = 0;
-  let currentUrlIdx = 0;
+  let widget = null;
+  let ready = false;
   let isPlaying = false;
-  let errorState = false;
-  let retryAttempts = 0;
-  let retryTimeout = null;
-  let recoveryInterval = null;
+  let currentIdx = 0;
+  let pauseDebounce = null;
 
   try {
-    const saved = parseInt(localStorage.getItem(STORAGE_STATION), 10);
-    if (!isNaN(saved) && saved >= 0 && saved < STATIONS.length) currentIdx = saved;
+    const saved = parseInt(localStorage.getItem(STORAGE_PLAYLIST), 10);
+    if (!isNaN(saved) && saved >= 0 && saved < PLAYLISTS.length) currentIdx = saved;
   } catch (e) {}
 
-  const audioEl     = document.getElementById('audioEl');
+  const iframe      = document.getElementById('sc-frame');
   const playBtn     = document.getElementById('playBtn');
   const playIcon    = document.getElementById('playIcon');
   const prevBtn     = document.getElementById('prevBtn');
@@ -392,176 +396,180 @@
   const stationName = document.getElementById('stationName');
   const stationSub  = document.getElementById('stationSub');
 
+  // Restore volume slider position
+  let vol = 50;
+  try {
+    const saved = parseInt(localStorage.getItem(STORAGE_VOLUME), 10);
+    if (!isNaN(saved)) vol = saved;
+  } catch (e) {}
+  volume.value = vol;
+
   function renderStation() {
-    stationName.textContent = STATIONS[currentIdx].name;
-    stationSub.textContent  = STATIONS[currentIdx].sub;
+    stationName.textContent = PLAYLISTS[currentIdx].name;
+    stationSub.textContent  = PLAYLISTS[currentIdx].sub;
   }
   renderStation();
 
-  // Restore volume
-  let v = 50;
-  try {
-    const saved = parseInt(localStorage.getItem(STORAGE_VOLUME), 10);
-    if (!isNaN(saved)) v = saved;
-  } catch (e) {}
-  volume.value = v;
-  audioEl.volume = v / 100;
-
-  function setSource() {
-    audioEl.src = STATIONS[currentIdx].urls[currentUrlIdx];
-  }
-  setSource();
-
-  function clearTimers() {
-    if (retryTimeout)    { clearTimeout(retryTimeout); retryTimeout = null; }
-    if (recoveryInterval){ clearInterval(recoveryInterval); recoveryInterval = null; }
+  function setPlayIcon(playing) {
+    playIcon.innerHTML = playing
+      ? '<path d="M6 5h4v14H6zm8 0h4v14h-4z"/>'
+      : '<path d="M8 5v14l11-7z"/>';
   }
 
-  function clearError() {
-    errorState = false;
-    retryAttempts = 0;
-    currentUrlIdx = 0;
-    clearTimers();
-    badge.style.cursor = '';
-    badge.title = '';
+  function showTrackTitle() {
+    if (!widget) return;
+    widget.getCurrentSound(function(sound) {
+      if (sound && sound.title) {
+        // Show track title under the playlist name
+        stationSub.textContent = sound.title;
+      } else {
+        stationSub.textContent = PLAYLISTS[currentIdx].sub;
+      }
+    });
   }
 
-  function setBadge(text, isError) {
-    badge.textContent = text;
-    if (isError) {
+  // ===== Init SoundCloud Widget (wait for API to be available) =====
+  function initWidget() {
+    widget = SC.Widget(iframe);
+
+    widget.bind(SC.Widget.Events.READY, function() {
+      ready = true;
+      playBtn.disabled = false;
+      widget.setVolume(parseInt(volume.value, 10));
+      badge.textContent = 'PAUSED';
+      // If we loaded a non-default playlist last session, load it now
+      if (currentIdx !== 0) {
+        loadPlaylist(currentIdx, false);
+      }
+    });
+
+    widget.bind(SC.Widget.Events.PLAY, function() {
+      if (pauseDebounce) { clearTimeout(pauseDebounce); pauseDebounce = null; }
+      isPlaying = true;
+      document.body.classList.add('playing');
+      setPlayIcon(true);
+      badge.textContent = 'LIVE';
+      showTrackTitle();
+    });
+
+    widget.bind(SC.Widget.Events.PAUSE, function() {
+      // SoundCloud fires a brief PAUSE between tracks. Debounce so the UI doesn't
+      // flicker to PAUSED mid-playlist — only show PAUSED if we're still paused
+      // after a short delay (i.e. a real user pause, not a track transition).
+      if (pauseDebounce) clearTimeout(pauseDebounce);
+      pauseDebounce = setTimeout(function() {
+        isPlaying = false;
+        document.body.classList.remove('playing');
+        setPlayIcon(false);
+        if (badge.textContent !== 'ERROR' && badge.textContent !== 'LOADING') {
+          badge.textContent = 'PAUSED';
+        }
+      }, 600);
+    });
+
+    widget.bind(SC.Widget.Events.FINISH, function() {
+      // Reached end of the whole playlist → loop back to the start to keep it continuous
+      widget.seekTo(0);
+      widget.play();
+    });
+
+    widget.bind(SC.Widget.Events.ERROR, function() {
+      badge.textContent = 'ERROR';
       badge.style.cursor = 'pointer';
       badge.title = 'Click to retry';
-    } else {
-      badge.style.cursor = '';
-      badge.title = '';
-    }
+    });
   }
 
-  // ===== Audio event handlers =====
-  audioEl.addEventListener('playing', () => {
-    isPlaying = true;
-    document.body.classList.add('playing');
-    playIcon.innerHTML = '<path d="M6 5h4v14H6zm8 0h4v14h-4z"/>';
-    setBadge('LIVE');
-    clearError();
-  });
-
-  audioEl.addEventListener('pause', () => {
-    isPlaying = false;
-    document.body.classList.remove('playing');
-    playIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
-    if (!errorState) setBadge('PAUSED');
-  });
-
-  audioEl.addEventListener('waiting', () => {
-    if (!errorState) setBadge('LOADING');
-  });
-
-  audioEl.addEventListener('error', () => handleError());
-  audioEl.addEventListener('stalled', () => {
-    // Don't immediately treat as error — sometimes streams briefly stall
-    // Only escalate if we don't recover within a few seconds
-    setTimeout(() => {
-      if (!isPlaying && audioEl.src) handleError();
-    }, 4000);
-  });
-
-  function handleError() {
-    if (errorState) return; // already handling
-    errorState = true;
-    console.log('Lofi widget: audio error on', STATIONS[currentIdx].name, audioEl.src);
-
-    // Try the fallback URL for the same station first
-    if (currentUrlIdx < STATIONS[currentIdx].urls.length - 1) {
-      currentUrlIdx++;
-      setSource();
-      setBadge('RETRYING', true);
-      audioEl.play().catch(() => scheduleRetry());
+  // The SoundCloud API script (api.js) may load slowly or be blocked by an
+  // ad/privacy blocker. Poll for `SC` for a few seconds before giving up.
+  let scWaitAttempts = 0;
+  function waitForSC() {
+    if (typeof SC !== 'undefined' && SC.Widget) {
+      initWidget();
       return;
     }
-
-    // Exhausted URLs for this station; back off and try again
-    setBadge('RETRYING', true);
-    scheduleRetry();
-    startRecoveryWatcher();
+    // Hard load failure flagged by the script tag's onerror
+    if (window.__scFailed) {
+      badge.textContent = 'BLOCKED';
+      badge.title = 'SoundCloud player was blocked (check ad blocker)';
+      stationSub.textContent = 'Player blocked — disable ad blocker for this page';
+      playBtn.disabled = true;
+      return;
+    }
+    scWaitAttempts++;
+    if (scWaitAttempts > 40) { // ~10s at 250ms intervals
+      badge.textContent = 'BLOCKED';
+      badge.title = 'SoundCloud player was blocked (check ad blocker)';
+      stationSub.textContent = 'Player blocked — disable ad blocker for this page';
+      playBtn.disabled = true;
+      return;
+    }
+    setTimeout(waitForSC, 250);
   }
-
-  function scheduleRetry() {
-    clearTimeout(retryTimeout);
-    const delay = Math.min(2000 * Math.pow(2, retryAttempts), 30000);
-    retryTimeout = setTimeout(() => {
-      retryAttempts++;
-      // After 3 attempts on this station, jump to the next one
-      if (retryAttempts >= 3 && STATIONS.length > 1) {
-        currentIdx = (currentIdx + 1) % STATIONS.length;
-        currentUrlIdx = 0;
-        retryAttempts = 0;
-        try { localStorage.setItem(STORAGE_STATION, currentIdx); } catch (e) {}
-        renderStation();
-      } else {
-        currentUrlIdx = 0;
-      }
-      setSource();
-      audioEl.play().catch(() => {});
-    }, delay);
-  }
-
-  function startRecoveryWatcher() {
-    if (recoveryInterval) return;
-    recoveryInterval = setInterval(() => {
-      if (errorState && !isPlaying) {
-        // Quietly attempt to reload in the background
-        setSource();
-        audioEl.play().catch(() => {});
-      }
-    }, 60000);
-  }
+  waitForSC();
 
   // ===== Controls =====
-  playBtn.onclick = () => {
-    if (isPlaying) {
-      audioEl.pause();
-    } else {
-      // If we're in error state, clear it and try fresh
-      if (errorState) {
-        clearError();
-        currentUrlIdx = 0;
-        setSource();
-      }
-      const p = audioEl.play();
-      if (p && p.catch) p.catch(() => handleError());
-    }
+  playBtn.onclick = function() {
+    if (!ready) return;
+    widget.toggle();
   };
 
-  function switchStation(delta) {
-    currentIdx = (currentIdx + delta + STATIONS.length) % STATIONS.length;
-    currentUrlIdx = 0;
-    try { localStorage.setItem(STORAGE_STATION, currentIdx); } catch (e) {}
+  prevBtn.onclick = function() {
+    if (!ready) return;
+    widget.prev();
+    setTimeout(showTrackTitle, 400);
+  };
+
+  nextBtn.onclick = function() {
+    if (!ready) return;
+    widget.next();
+    setTimeout(showTrackTitle, 400);
+  };
+
+  volume.oninput = function() {
+    const v = parseInt(volume.value, 10);
+    if (ready) widget.setVolume(v);
+    try { localStorage.setItem(STORAGE_VOLUME, v); } catch (e) {}
+  };
+
+  // Long-press / double behavior: tapping the station name cycles playlists.
+  // We add explicit prev/next playlist by tapping the badge area is reserved for retry,
+  // so cycling playlists happens by clicking the station name.
+  document.querySelector('.station-name').style.cursor = 'pointer';
+  document.querySelector('.station-name').title = 'Switch playlist';
+  document.querySelector('.station-name').addEventListener('click', function() {
+    if (!ready) return;
+    loadPlaylist((currentIdx + 1) % PLAYLISTS.length, true);
+  });
+
+  function loadPlaylist(idx, autoPlay) {
+    currentIdx = idx;
+    try { localStorage.setItem(STORAGE_PLAYLIST, currentIdx); } catch (e) {}
     renderStation();
-    clearError();
-    setSource();
-    if (isPlaying) {
-      const p = audioEl.play();
-      if (p && p.catch) p.catch(() => handleError());
-    }
+    badge.textContent = 'LOADING';
+    widget.load(PLAYLISTS[currentIdx].url, {
+      auto_play: autoPlay,
+      hide_related: true,
+      show_comments: false,
+      show_user: false,
+      visual: false,
+      callback: function() {
+        widget.setVolume(parseInt(volume.value, 10));
+        if (autoPlay) {
+          widget.play();
+        } else {
+          badge.textContent = 'PAUSED';
+        }
+      }
+    });
   }
-  prevBtn.onclick = () => switchStation(-1);
-  nextBtn.onclick = () => switchStation(1);
 
-  volume.oninput = () => {
-    const val = parseInt(volume.value, 10);
-    audioEl.volume = val / 100;
-    try { localStorage.setItem(STORAGE_VOLUME, val); } catch (e) {}
-  };
-
-  // Tap badge to retry immediately when errored
-  badge.addEventListener('click', () => {
-    if (!errorState) return;
-    clearError();
-    currentUrlIdx = 0;
-    setSource();
-    setBadge('RETRYING', true);
-    audioEl.play().catch(() => handleError());
+  // Badge click = retry on error
+  badge.addEventListener('click', function() {
+    if (badge.textContent !== 'ERROR') return;
+    badge.style.cursor = '';
+    badge.title = '';
+    loadPlaylist(currentIdx, true);
   });
 </script>
 </body>
